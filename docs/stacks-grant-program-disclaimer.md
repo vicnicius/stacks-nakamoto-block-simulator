@@ -1,6 +1,6 @@
 # Stacks Grant Program Disclaimer
 
-This project is part of the Stacks Foundation Grant Program. It was one of the Critical Bounties published in the first quarter of 2023. You can find the Bounty description here: [Stacks-Grant-Launchpad/discussions/859](https://github.com/stacksgov/Stacks-Grant-Launchpad/discussions/859)
+This project is part of the Stacks Foundation Grant Program. It was one of the Critical Bounties published in the first quarter of 2023, and it was awarded $12.6k by the Stacks Foundation. You can find the Bounty description here: [Stacks-Grant-Launchpad/discussions/859](https://github.com/stacksgov/Stacks-Grant-Launchpad/discussions/859)
 
 ### The original proposal
 
