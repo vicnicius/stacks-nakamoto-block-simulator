@@ -1,10 +1,13 @@
-function App() {
-  return (
-    <div>
-      <header>Header</header>
-      <main>App</main>
-    </div>
-  );
-}
+import React, { FC } from "react";
+import { Header } from "./ui/components/header/Header";
+import { Canvas } from "./ui/Canvas";
+import "./App.css";
 
-export default App;
+export const App: FC = () => {
+  return (
+    <main className="App">
+      <Header />
+      <Canvas />
+    </main>
+  );
+};
