@@ -23,7 +23,9 @@
   "scripts": {
     "start": "react-scripts  --openssl-legacy-provider start",
     "build": "react-scripts  --openssl-legacy-provider build",
-    "test": "react-scripts  --openssl-legacy-provider test"
+    "test": "react-scripts  --openssl-legacy-provider test",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx src",
+    "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx src"
   },
   "browserslist": {
     "production": [

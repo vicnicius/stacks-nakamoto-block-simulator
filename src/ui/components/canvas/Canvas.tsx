@@ -2,17 +2,13 @@ import React, { FC, useContext, useEffect, useRef } from "react";
 import { Canvas as FiberCanvas } from "@react-three/fiber";
 import "./Canvas.css";
 import { DividerLine } from "./components/DividerLine";
-import {
-  OrbitControls,
-  OrthographicCamera,
-  useHelper,
-} from "@react-three/drei";
+import { OrbitControls, OrthographicCamera } from "@react-three/drei";
 import { StacksBlockchain } from "./StacksBlockchain";
 import { DimensionsContext } from "../../../domain/Dimensions";
 import { OrthographicCamera as ThreeOrtographicCamera } from "three";
 
 export const Canvas: FC = () => {
-  const camera = useRef<ThreeOrtographicCamera>(null!);
+  const camera = useRef<ThreeOrtographicCamera>();
   const { height, width } = useContext(DimensionsContext);
   useEffect(() => {
     if (camera.current) {
