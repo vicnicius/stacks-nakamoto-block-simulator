@@ -9,11 +9,7 @@ import {
 } from "@react-three/drei";
 import { StacksBlockchain } from "./StacksBlockchain";
 import { DimensionsContext } from "../../../domain/Dimensions";
-import {
-  CameraHelper,
-  SpotLight,
-  OrthographicCamera as ThreeOrtographicCamera,
-} from "three";
+import { OrthographicCamera as ThreeOrtographicCamera } from "three";
 
 export const Canvas: FC = () => {
   const camera = useRef<ThreeOrtographicCamera>(null!);
@@ -29,14 +25,14 @@ export const Canvas: FC = () => {
         <OrthographicCamera
           makeDefault
           position={[50, 50, 50]}
-          zoom={50}
+          zoom={30}
           rotation={[Math.atan(-1 / Math.sqrt(2)), -Math.PI / 4, 0]}
           ref={camera}
         />
         <StacksBlockchain />
         <DividerLine />
-        <gridHelper args={[10, 10]} />
-        <axesHelper args={[10]} />
+        <gridHelper args={[100, 100]} />
+        <axesHelper args={[100]} />
         <OrbitControls />
       </FiberCanvas>
     </section>

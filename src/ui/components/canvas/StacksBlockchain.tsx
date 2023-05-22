@@ -66,11 +66,11 @@ const sampleBlocks: BlockHeight[] = [
     actions: [],
     blocks: [{ id: "1", state: "new" }],
   },
-  // {
-  //   depth: 2,
-  //   actions: [],
-  //   blocks: [{ id: "2", state: "new" }],
-  // },
+  {
+    depth: 2,
+    actions: [],
+    blocks: [{ id: "2", state: "new" }],
+  },
 ];
 
 const Divider: FC<{ depth: number }> = ({ depth }) => {
@@ -112,17 +112,19 @@ const BlockHeightLabel: FC<{ depth: number }> = ({ depth }) => {
 };
 
 const Block: FC<{ depth: number }> = ({ depth }) => {
-  const { height } = useContext(DimensionsContext);
+  const anchorY = 1;
+  const anchorX = -2;
+  const anchorZ = 3;
   return (
-    <group>
-      <mesh position={[0, 0, 0]}>
+    <group position={[anchorX, anchorY, anchorZ]}>
+      <mesh>
         <boxBufferGeometry args={[0.75, 0.75, 0.75]} />
-        <meshPhysicalMaterial color="#291F9B" />
+        <meshPhysicalMaterial color="#291F9B" transparent opacity={0.9} />
       </mesh>
-      <mesh position={[0, 0, 0]}>
+      <mesh>
         <boxBufferGeometry args={[1, 1, 1]} />
-        <meshPhysicalMaterial color="#291F9B" transparent opacity={0.8} />
-        {/* // Use Edges scale for hover state later */}
+        <meshPhysicalMaterial color="#291F9B" transparent opacity={0.5} />
+        {/* @TODO: Use Edges scale for hover state later */}
         <Edges color="#ffffff" scale={1} />
       </mesh>
     </group>
@@ -131,32 +133,56 @@ const Block: FC<{ depth: number }> = ({ depth }) => {
 
 const BlockHeightSpace: FC<BlockHeight> = ({ depth, actions, blocks }) => {
   return (
-    <>
+    <group>
       {blocks.map((block) => (
         <Block depth={depth} />
       ))}
       <BlockHeightLabel depth={depth} />
       <Divider depth={depth} />
-    </>
+    </group>
   );
 };
 
 export const StacksBlockchain: FC = () => {
-  const light = useRef<SpotLight>(null!);
-  // useHelper(light, SpotLightHelper, "cyan");
+  const { height } = useContext(DimensionsContext);
+  const topLight = useRef<SpotLight>(null!);
+  const bottomLight = useRef<SpotLight>(null!);
+  const mainLight = useRef<SpotLight>(null!);
+  useHelper(mainLight, SpotLightHelper, "white");
+  useHelper(topLight, SpotLightHelper, "yellow");
+  useHelper(bottomLight, SpotLightHelper, "purple");
+  useEffect(() => {
+    mainLight.current.lookAt(0, 0, 0);
+    topLight.current.lookAt(0, 0, 0);
+    bottomLight.current.lookAt(0, 0, 0);
+  }, []);
   return (
-    <>
+    <group>
       <spotLight
-        intensity={15}
-        distance={5}
+        intensity={10}
+        distance={100}
         color={"white"}
-        position={[1, 1, 1]}
-        ref={light}
+        position={[0, 100 / 2, 0]}
+        ref={topLight}
+      />
+      <spotLight
+        intensity={10}
+        distance={100}
+        color={"white"}
+        position={[100 / 3, 100 / 3, 100 / 3]}
+        ref={mainLight}
+      />
+      <spotLight
+        intensity={75}
+        distance={85}
+        color={"#7A40EE"}
+        position={[0, -100 / 3, 100 / 3]}
+        ref={bottomLight}
       />
       <Title />
       {sampleBlocks.map((blockHeight) => (
         <BlockHeightSpace {...blockHeight} key={blockHeight.depth} />
       ))}
-    </>
+    </group>
   );
 };
