@@ -13,9 +13,19 @@ export const DimensionsContext = createContext<{
   width: number;
   height: number;
   blockSpace: number;
+  sceneHeight: number;
+  sceneWidth: number;
+  setSceneHeight: (height: number) => void;
+  setSceneWidth: (width: number) => void;
 }>({
   aspect: 16 / 9,
   width: 1024,
   height: 768,
   blockSpace,
+  sceneHeight: 0,
+  sceneWidth: 0,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setSceneWidth: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setSceneHeight: () => {},
 });

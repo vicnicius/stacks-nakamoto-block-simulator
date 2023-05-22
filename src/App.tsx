@@ -18,6 +18,10 @@ export const App: FC = () => {
   // Canvas width is the window width minus two times the margin size for
   // the page margins.
   const [width, setWidth] = useState(window.innerWidth - 2 * marginSize);
+  // The sceneWidth sets the whole width of the scene in its own coordinate unit
+  const [sceneWidth, setSceneWidth] = useState(0);
+  // The sceneHeight sets the whole height of the scene in its own coordinate unit
+  const [sceneHeight, setSceneHeight] = useState(0);
   const aspect = width / height;
 
   useEffect(() => {
@@ -31,7 +35,18 @@ export const App: FC = () => {
 
   return (
     <main className="App">
-      <DimensionsContext.Provider value={{ blockSpace, width, height, aspect }}>
+      <DimensionsContext.Provider
+        value={{
+          blockSpace,
+          width,
+          height,
+          aspect,
+          sceneHeight,
+          sceneWidth,
+          setSceneHeight,
+          setSceneWidth,
+        }}
+      >
         <Header />
         <Canvas />
       </DimensionsContext.Provider>

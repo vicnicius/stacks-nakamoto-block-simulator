@@ -1,33 +1,12 @@
-import React, {
-  FC,
-  MutableRefObject,
-  RefObject,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
-import {
-  Box,
-  Edges,
-  GradientTexture,
-  Line,
-  Text,
-  useHelper,
-} from "@react-three/drei";
+import React, { FC, useContext, useEffect, useRef } from "react";
+import { Edges, Line, Text, useHelper } from "@react-three/drei";
 import { layout } from "./helpers";
-import {
-  CameraHelper,
-  OrthographicCamera,
-  SpotLight,
-  SpotLightHelper,
-  Vector3,
-} from "three";
+import { SpotLight, SpotLightHelper, Vector3 } from "three";
 import {
   DimensionsContext,
   fontSize,
   marginSize,
 } from "../../../domain/Dimensions";
-import { useFrame } from "@react-three/fiber";
 
 type Action = "mine" | "fork" | "freeze";
 
@@ -111,7 +90,7 @@ const BlockHeightLabel: FC<{ depth: number }> = ({ depth }) => {
   );
 };
 
-const Block: FC<{ depth: number }> = ({ depth }) => {
+const Block: FC<{ depth: number }> = () => {
   const anchorY = 1;
   const anchorX = -2;
   const anchorZ = 3;
@@ -131,11 +110,11 @@ const Block: FC<{ depth: number }> = ({ depth }) => {
   );
 };
 
-const BlockHeightSpace: FC<BlockHeight> = ({ depth, actions, blocks }) => {
+const BlockHeightSpace: FC<BlockHeight> = ({ depth, blocks }) => {
   return (
     <group>
       {blocks.map((block) => (
-        <Block depth={depth} />
+        <Block key={block.id} depth={depth} />
       ))}
       <BlockHeightLabel depth={depth} />
       <Divider depth={depth} />
@@ -144,10 +123,9 @@ const BlockHeightSpace: FC<BlockHeight> = ({ depth, actions, blocks }) => {
 };
 
 export const StacksBlockchain: FC = () => {
-  const { height } = useContext(DimensionsContext);
-  const topLight = useRef<SpotLight>(null!);
-  const bottomLight = useRef<SpotLight>(null!);
-  const mainLight = useRef<SpotLight>(null!);
+  const topLight = useRef<SpotLight>(new SpotLight());
+  const bottomLight = useRef<SpotLight>(new SpotLight());
+  const mainLight = useRef<SpotLight>(new SpotLight());
   useHelper(mainLight, SpotLightHelper, "white");
   useHelper(topLight, SpotLightHelper, "yellow");
   useHelper(bottomLight, SpotLightHelper, "purple");
