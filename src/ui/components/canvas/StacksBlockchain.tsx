@@ -1,4 +1,10 @@
-import React, { FC, useContext, useEffect, useRef } from "react";
+import React, {
+  FC,
+  MutableRefObject,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import { Edges, Line, Text, useHelper } from "@react-three/drei";
 import { layout } from "./helpers";
 import { SpotLight, SpotLightHelper, Vector3 } from "three";
@@ -7,6 +13,7 @@ import {
   fontSize,
   marginSize,
 } from "../../../domain/Dimensions";
+import { DebugContext } from "../../../domain/Debug";
 
 type Action = "mine" | "fork" | "freeze";
 
@@ -91,17 +98,17 @@ const BlockHeightLabel: FC<{ depth: number }> = ({ depth }) => {
 };
 
 const Block: FC<{ depth: number }> = () => {
-  const anchorY = 1;
-  const anchorX = -2;
-  const anchorZ = 3;
+  const anchorY = 0;
+  const anchorX = 0;
+  const anchorZ = 0;
   return (
     <group position={[anchorX, anchorY, anchorZ]}>
       <mesh>
-        <boxBufferGeometry args={[0.75, 0.75, 0.75]} />
+        <boxGeometry args={[15, 15, 15]} />
         <meshPhysicalMaterial color="#291F9B" transparent opacity={0.9} />
       </mesh>
       <mesh>
-        <boxBufferGeometry args={[1, 1, 1]} />
+        <boxGeometry args={[20, 20, 20]} />
         <meshPhysicalMaterial color="#291F9B" transparent opacity={0.5} />
         {/* @TODO: Use Edges scale for hover state later */}
         <Edges color="#ffffff" scale={1} />
@@ -122,39 +129,58 @@ const BlockHeightSpace: FC<BlockHeight> = ({ depth, blocks }) => {
   );
 };
 
-export const StacksBlockchain: FC = () => {
-  const topLight = useRef<SpotLight>(new SpotLight());
-  const bottomLight = useRef<SpotLight>(new SpotLight());
-  const mainLight = useRef<SpotLight>(new SpotLight());
+const LightHelpers: FC<{
+  bottomLight: MutableRefObject<SpotLight>;
+  mainLight: MutableRefObject<SpotLight>;
+  topLight: MutableRefObject<SpotLight>;
+}> = ({ mainLight, bottomLight, topLight }) => {
   useHelper(mainLight, SpotLightHelper, "white");
   useHelper(topLight, SpotLightHelper, "yellow");
   useHelper(bottomLight, SpotLightHelper, "purple");
+  return <></>;
+};
+
+export const StacksBlockchain: FC = () => {
+  const { debug } = useContext(DebugContext);
+  const { height } = useContext(DimensionsContext);
+  const topLight = useRef<SpotLight>(new SpotLight());
+  const bottomLight = useRef<SpotLight>(new SpotLight());
+  const mainLight = useRef<SpotLight>(new SpotLight());
+
   useEffect(() => {
     mainLight.current.lookAt(0, 0, 0);
     topLight.current.lookAt(0, 0, 0);
     bottomLight.current.lookAt(0, 0, 0);
   }, []);
+
   return (
     <group>
+      {debug && (
+        <LightHelpers
+          topLight={topLight}
+          bottomLight={bottomLight}
+          mainLight={mainLight}
+        />
+      )}
       <spotLight
         intensity={10}
-        distance={100}
-        color={"white"}
-        position={[0, 100 / 2, 0]}
+        distance={height}
+        color={"yellow"}
+        position={[0, height / 2, 0]}
         ref={topLight}
       />
       <spotLight
         intensity={10}
-        distance={100}
+        distance={height}
         color={"white"}
-        position={[100 / 3, 100 / 3, 100 / 3]}
+        position={[height / 3, height / 3, height / 3]}
         ref={mainLight}
       />
       <spotLight
         intensity={75}
-        distance={85}
+        distance={height}
         color={"#7A40EE"}
-        position={[0, -100 / 3, 100 / 3]}
+        position={[0, -height / 3, height / 3]}
         ref={bottomLight}
       />
       <Title />

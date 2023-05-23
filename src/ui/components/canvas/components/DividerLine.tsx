@@ -11,7 +11,7 @@ export const DividerLine: FC = () => {
   ];
   return (
     <mesh>
-      <Line points={vertices} color={"#FAFAFA"} lineWidth={0.25} />
+      <Line points={vertices} color={"#FFFFFF"} lineWidth={1} />
     </mesh>
   );
 };
