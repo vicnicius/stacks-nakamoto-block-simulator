@@ -12,11 +12,7 @@ import { DimensionsContext } from "../../../../domain/Dimensions";
 
 const LightHelpers: FC<{
   bottomLight: MutableRefObject<SpotLight>;
-  mainLight: MutableRefObject<SpotLight>;
-  topLight: MutableRefObject<SpotLight>;
-}> = ({ mainLight, bottomLight, topLight }) => {
-  useHelper(mainLight, SpotLightHelper, "white");
-  useHelper(topLight, SpotLightHelper, "yellow");
+}> = ({ bottomLight }) => {
   useHelper(bottomLight, SpotLightHelper, "purple");
   return null;
 };
@@ -24,43 +20,21 @@ const LightHelpers: FC<{
 export const Lights = () => {
   const { debug } = useContext(DebugContext);
   const { height } = useContext(DimensionsContext);
-  const topLight = useRef<SpotLight>(new SpotLight());
   const bottomLight = useRef<SpotLight>(new SpotLight());
-  const mainLight = useRef<SpotLight>(new SpotLight());
 
   useEffect(() => {
-    mainLight.current.lookAt(0, 0, 0);
-    topLight.current.lookAt(0, 0, 0);
     bottomLight.current.lookAt(0, 0, 0);
   }, []);
   return (
     <>
-      {debug && (
-        <LightHelpers
-          topLight={topLight}
-          bottomLight={bottomLight}
-          mainLight={mainLight}
-        />
-      )}
+      {debug && <LightHelpers bottomLight={bottomLight} />}
+      <ambientLight intensity={6.5} />
       <spotLight
-        intensity={10}
-        distance={height}
-        color={"yellow"}
-        position={[0, height / 2, 0]}
-        ref={topLight}
-      />
-      <spotLight
-        intensity={10}
-        distance={height}
-        color={"white"}
-        position={[height / 3, height / 3, height / 3]}
-        ref={mainLight}
-      />
-      <spotLight
-        intensity={75}
-        distance={height}
-        color={"#7A40EE"}
-        position={[0, -height / 3, height / 3]}
+        intensity={200}
+        distance={height * 2}
+        decay={1.5}
+        color={"#291F9B"}
+        position={[0, -height, height]}
         ref={bottomLight}
       />
     </>

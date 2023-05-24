@@ -1,21 +1,34 @@
-import { Edges, Line, Text } from "@react-three/drei";
+import {
+  Billboard,
+  Center,
+  Circle,
+  Edges,
+  GradientTexture,
+  Line,
+  Text,
+} from "@react-three/drei";
 import React, { FC, useContext } from "react";
-import { Vector3 } from "three";
 import {
   DimensionsContext,
-  fontSize,
+  blockSpace,
+  cubeSize,
   marginSize,
 } from "../../../domain/Dimensions";
 
 type Action = "mine" | "fork" | "freeze";
 
+enum BlockConnection {
+  BOTTOM,
+  RIGHT,
+  LEFT,
+}
+
 interface Block {
   id: string;
   state: "new" | "frozen";
+  connection: BlockConnection[];
 }
 
-// One block height is made of one or multiple blocks,
-// their connections and the associated actions.
 interface BlockHeight {
   depth: number;
   actions: Action[];
@@ -26,82 +39,107 @@ const sampleBlocks: BlockHeight[] = [
   {
     depth: 1,
     actions: [],
-    blocks: [{ id: "1", state: "new" }],
+    blocks: [{ id: "1", state: "new", connection: [BlockConnection.BOTTOM] }],
   },
   {
     depth: 2,
     actions: [],
-    blocks: [{ id: "2", state: "new" }],
+    blocks: [{ id: "2", state: "new", connection: [] }],
   },
 ];
+function getIsometricCoordinates(
+  horizontalDistance: number,
+  verticalDistance: number
+): [x: number, y: number, z: number] {
+  const x = horizontalDistance * Math.sqrt(2);
+  const y = verticalDistance;
+  const z = -horizontalDistance * Math.sqrt(2);
+  return [x, y, z];
+}
 
-const Divider: FC<{ depth: number }> = ({ depth }) => {
-  const { blockSpace, height, width } = useContext(DimensionsContext);
-  const anchorX = -width / 2 + marginSize;
-  const anchorY = height / 2 - marginSize / 2 - depth * blockSpace;
-  return (
-    <mesh>
-      <Line
-        points={[
-          new Vector3(anchorX, anchorY, 0),
-          new Vector3(-marginSize, anchorY, 0),
-        ]}
-        color={"#666666"}
-        lineWidth={0.25}
-      />
-    </mesh>
+const Block: FC<{
+  depth: number;
+  id: string;
+  connections: BlockConnection[];
+}> = ({ connections, depth, id }) => {
+  const { height, width } = useContext(DimensionsContext);
+  const initialCubeY = height / 2;
+  const innerCubeSize = cubeSize * 0.65;
+  const [anchorX, anchorY, anchorZ] = getIsometricCoordinates(
+    -width / 8,
+    initialCubeY - (depth - 1) * blockSpace
   );
-};
-
-const BlockHeightLabel: FC<{ depth: number }> = ({ depth }) => {
-  const { blockSpace, height, width } = useContext(DimensionsContext);
-  const anchorX = -width / 2 + marginSize / 2;
-  const anchorY =
-    height / 2 - marginSize / 2 - depth * blockSpace + fontSize.small / 2;
   return (
-    <Text
-      color={"#333333"}
-      fontSize={fontSize.small}
-      font="Inter"
-      textAlign="right"
-      anchorY="top"
-      anchorX="right"
-      position={[anchorX, anchorY, 0]}
-    >
-      #{depth}
-    </Text>
-  );
-};
-
-const Block: FC<{ depth: number }> = () => {
-  const anchorY = 0;
-  const anchorX = 0;
-  const anchorZ = 0;
-  return (
-    <group position={[anchorX, anchorY, anchorZ]}>
-      <mesh>
-        <boxGeometry args={[15, 15, 15]} />
-        <meshPhysicalMaterial color="#291F9B" transparent opacity={0.9} />
-      </mesh>
-      <mesh>
-        <boxGeometry args={[20, 20, 20]} />
-        <meshPhysicalMaterial color="#291F9B" transparent opacity={0.5} />
-        {/* @TODO: Use Edges scale for hover state later */}
-        <Edges color="#ffffff" scale={1} />
-      </mesh>
-    </group>
+    <>
+      <group position={[anchorX, anchorY, anchorZ]}>
+        <Billboard position={[cubeSize, cubeSize + 5, 0]}>
+          <Center>
+            <mesh>
+              <Circle args={[10]}>
+                <meshBasicMaterial color={"#FFFFFF"} />
+              </Circle>
+              <Circle args={[9]}>
+                <meshBasicMaterial color={"#000000"} />
+              </Circle>
+            </mesh>
+            <Text fontSize={12} font="/assets/fonts/Inter-Regular.ttf">
+              {id}
+            </Text>
+          </Center>
+        </Billboard>
+        <mesh>
+          <boxGeometry args={[innerCubeSize, innerCubeSize, innerCubeSize]} />
+          <meshBasicMaterial>
+            <GradientTexture stops={[0, 1]} colors={["#948BF8", "#DCD9FA"]} />
+          </meshBasicMaterial>
+          <Edges color="#FFFFFF" scale={1} />
+        </mesh>
+        <mesh>
+          <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
+          <meshPhysicalMaterial
+            color={"#291F9B"}
+            transparent={true}
+            opacity={0.9}
+            transmission={0.15}
+            metalness={0}
+            roughness={1}
+            reflectivity={0.25}
+            clearcoat={1}
+            clearcoatRoughness={0}
+          />
+          <Edges color="#FFFFFF" scale={0.95} />
+        </mesh>
+        {connections.includes(BlockConnection.BOTTOM) && (
+          <Line
+            points={[
+              0,
+              // Centering the connection line to the bottom of the cube, accounting for the isometric angle correction
+              -cubeSize + cubeSize * Math.SQRT2 - cubeSize,
+              0,
+              0,
+              -cubeSize - blockSpace / 2,
+              0,
+            ]}
+            color={"#FFFFFF"}
+          />
+        )}
+      </group>
+    </>
   );
 };
 
 const BlockHeightSpace: FC<BlockHeight> = ({ depth, blocks }) => {
   return (
-    <group>
+    <>
       {blocks.map((block) => (
-        <Block key={block.id} depth={depth} />
+        <Block
+          key={block.id}
+          depth={depth}
+          id={block.id}
+          connections={block.connection}
+        />
       ))}
-      <BlockHeightLabel depth={depth} />
-      <Divider depth={depth} />
-    </group>
+    </>
   );
 };
 
