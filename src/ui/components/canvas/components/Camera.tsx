@@ -15,7 +15,7 @@ export const Camera: FC<{ isometric?: boolean }> = (
   return (
     <OrthographicCamera
       makeDefault
-      position={isometric ? [100, 100, 100] : [0, 0, 100]}
+      position={isometric ? [300, 300, 300] : [0, 0, 100]}
       zoom={1}
       rotation={isometric ? isometricCameraAngle : [0, 0, 0]}
       ref={camera}

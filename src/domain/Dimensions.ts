@@ -4,6 +4,7 @@ import { Euler } from "three";
 export const blockSpace = 96;
 export const marginSize = 32;
 export const headerSize = 60;
+export const cubeSize = 30;
 export const fontSize = {
   small: 12,
   regular: 16,
