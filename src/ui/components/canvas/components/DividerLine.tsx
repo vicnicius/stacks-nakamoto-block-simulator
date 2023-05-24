@@ -9,9 +9,5 @@ export const DividerLine: FC = () => {
     new Vector3(0, -height / 2, 0),
     new Vector3(0, height / 2, 0),
   ];
-  return (
-    <mesh>
-      <Line points={vertices} color={"#FFFFFF"} lineWidth={1} />
-    </mesh>
-  );
+  return <Line points={vertices} color={"#FFFFFF"} lineWidth={1} />;
 };

@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import { ReactComponent as LogoSvg } from "./resources/logo.svg";
+
 import "./Logo.css";
 
 const LogoTitle: FC = () => {

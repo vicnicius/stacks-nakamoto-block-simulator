@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import { Icons, Icon } from "../icon/Icon";
+import { Icon, Icons } from "../icon/Icon";
 import "./Button.css";
 
 interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {

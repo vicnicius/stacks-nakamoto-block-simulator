@@ -1,19 +1,11 @@
-import React, {
-  FC,
-  MutableRefObject,
-  useContext,
-  useEffect,
-  useRef,
-} from "react";
-import { Edges, Line, Text, useHelper } from "@react-three/drei";
-import { layout } from "./helpers";
-import { SpotLight, SpotLightHelper, Vector3 } from "three";
+import { Edges, Line, Text } from "@react-three/drei";
+import React, { FC, useContext } from "react";
+import { Vector3 } from "three";
 import {
   DimensionsContext,
   fontSize,
   marginSize,
 } from "../../../domain/Dimensions";
-import { DebugContext } from "../../../domain/Debug";
 
 type Action = "mine" | "fork" | "freeze";
 
@@ -22,29 +14,13 @@ interface Block {
   state: "new" | "frozen";
 }
 
+// One block height is made of one or multiple blocks,
+// their connections and the associated actions.
 interface BlockHeight {
   depth: number;
   actions: Action[];
   blocks: Block[];
 }
-// One block height is made of one or multiple blocks,
-// their connections and the associated actions.
-const Title: FC = () => {
-  const { height } = useContext(DimensionsContext);
-  return (
-    <Text
-      color={"#FFFFFF"}
-      fontSize={fontSize.regular}
-      font="Inter"
-      textAlign="right"
-      anchorY="top"
-      anchorX="right"
-      position={[-layout.defaultMargin / 2, height / 2, 0]}
-    >
-      Stacks
-    </Text>
-  );
-};
 
 const sampleBlocks: BlockHeight[] = [
   {
@@ -129,61 +105,9 @@ const BlockHeightSpace: FC<BlockHeight> = ({ depth, blocks }) => {
   );
 };
 
-const LightHelpers: FC<{
-  bottomLight: MutableRefObject<SpotLight>;
-  mainLight: MutableRefObject<SpotLight>;
-  topLight: MutableRefObject<SpotLight>;
-}> = ({ mainLight, bottomLight, topLight }) => {
-  useHelper(mainLight, SpotLightHelper, "white");
-  useHelper(topLight, SpotLightHelper, "yellow");
-  useHelper(bottomLight, SpotLightHelper, "purple");
-  return <></>;
-};
-
-export const StacksBlockchain: FC = () => {
-  const { debug } = useContext(DebugContext);
-  const { height } = useContext(DimensionsContext);
-  const topLight = useRef<SpotLight>(new SpotLight());
-  const bottomLight = useRef<SpotLight>(new SpotLight());
-  const mainLight = useRef<SpotLight>(new SpotLight());
-
-  useEffect(() => {
-    mainLight.current.lookAt(0, 0, 0);
-    topLight.current.lookAt(0, 0, 0);
-    bottomLight.current.lookAt(0, 0, 0);
-  }, []);
-
+export const BlocksScene: FC = () => {
   return (
     <group>
-      {debug && (
-        <LightHelpers
-          topLight={topLight}
-          bottomLight={bottomLight}
-          mainLight={mainLight}
-        />
-      )}
-      <spotLight
-        intensity={10}
-        distance={height}
-        color={"yellow"}
-        position={[0, height / 2, 0]}
-        ref={topLight}
-      />
-      <spotLight
-        intensity={10}
-        distance={height}
-        color={"white"}
-        position={[height / 3, height / 3, height / 3]}
-        ref={mainLight}
-      />
-      <spotLight
-        intensity={75}
-        distance={height}
-        color={"#7A40EE"}
-        position={[0, -height / 3, height / 3]}
-        ref={bottomLight}
-      />
-      <Title />
       {sampleBlocks.map((blockHeight) => (
         <BlockHeightSpace {...blockHeight} key={blockHeight.depth} />
       ))}
