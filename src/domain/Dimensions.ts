@@ -1,4 +1,5 @@
 import { createContext } from "react";
+import { Euler } from "three";
 
 export const blockSpace = 96;
 export const marginSize = 32;
@@ -7,6 +8,12 @@ export const fontSize = {
   small: 12,
   regular: 16,
 };
+
+export const isometricCameraAngle = new Euler(
+  Math.atan(-1 / Math.sqrt(2)),
+  -Math.PI / 4,
+  0
+);
 
 export const DimensionsContext = createContext<{
   aspect: number;

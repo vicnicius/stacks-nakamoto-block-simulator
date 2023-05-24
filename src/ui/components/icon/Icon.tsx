@@ -1,9 +1,9 @@
 import React, { FC } from "react";
-import { ReactComponent as Undo } from "./resources/undo.svg";
-import { ReactComponent as Redo } from "./resources/redo.svg";
 import { ReactComponent as List } from "./resources/list.svg";
 import { ReactComponent as Load } from "./resources/load.svg";
+import { ReactComponent as Redo } from "./resources/redo.svg";
 import { ReactComponent as Save } from "./resources/save.svg";
+import { ReactComponent as Undo } from "./resources/undo.svg";
 import { ReactComponent as ZoomIn } from "./resources/zoom-in.svg";
 import { ReactComponent as ZoomOut } from "./resources/zoom-out.svg";
 
