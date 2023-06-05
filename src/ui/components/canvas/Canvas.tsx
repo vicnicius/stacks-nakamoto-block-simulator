@@ -61,8 +61,8 @@ export const Canvas: FC = () => {
           blur={1}
           near={1}
           far={1000}
+          files={"/assets/environments/studio.hdr"}
           resolution={256}
-          preset="studio"
         >
           <pointLight
             position={[-width / 2, -width / 2, width / 2]}
