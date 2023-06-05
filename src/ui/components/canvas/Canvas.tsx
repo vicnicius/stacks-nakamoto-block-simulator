@@ -21,16 +21,28 @@ export const Canvas: FC = () => {
   const blockchain: Blockchain<Chain.STX> = {
     block: {
       id: "0",
-      height: 0,
+      position: { vertical: 1, horizontal: 1 },
       type: Chain.STX,
       state: StacksBlockState.NEW,
     },
-    actions: [BlockAction.MINE],
+    actions: [BlockAction.MINE, BlockAction.MINE],
     children: [
       {
         block: {
           id: "1",
-          height: 1,
+          parent: { id: "0", position: { vertical: 1, horizontal: 1 } },
+          position: { vertical: 2, horizontal: 1 },
+          type: Chain.STX,
+          state: StacksBlockState.NEW,
+        },
+        actions: [],
+        children: [],
+      },
+      {
+        block: {
+          id: "2",
+          parent: { id: "0", position: { vertical: 1, horizontal: 1 } },
+          position: { vertical: 2, horizontal: 2 },
           type: Chain.STX,
           state: StacksBlockState.NEW,
         },
@@ -58,7 +70,7 @@ export const Canvas: FC = () => {
             intensity={7.5}
           />
           <Camera isometric />
-          <BlockchainRender chain={blockchain} initialConnection={[]} />
+          <BlockchainRender chain={blockchain} />
           <HUDScene />
           <GridHelper />
           <AxesHelper />

@@ -10,7 +10,7 @@ import {
   Text,
 } from "@react-three/drei";
 import React, { FC, useContext } from "react";
-import { Block, Chain } from "../../../domain/Block";
+import { Block, BlockPosition, Chain } from "../../../domain/Block";
 import { Blockchain } from "../../../domain/Blockchain";
 import {
   DimensionsContext,
@@ -19,9 +19,9 @@ import {
 } from "../../../domain/Dimensions";
 
 enum BlockConnection {
-  BOTTOM,
-  LEFT,
-  RIGHT,
+  BOTTOM = "bottom",
+  LEFT = "left",
+  RIGHT = "right",
 }
 
 function getIsometricCoordinates(
@@ -34,17 +34,71 @@ function getIsometricCoordinates(
   return [x, y, z];
 }
 
-const BlockRender: FC<{ block: Block; connections: BlockConnection[] }> = ({
-  block: { id, height: blockHeight },
+const cubeHorizontalDistance = blockSpace;
+const cubeVerticalDistance = blockSpace;
+
+const getAnchorsFromPosition: (
+  position: BlockPosition,
+  spaceWidth: number,
+  spaceHeight: number
+) => [number, number, number] = (position, spaceWidth, spaceHeight) => {
+  const { vertical: positionY, horizontal: positionX } = position;
+  const initialY = (spaceHeight / 2) * Math.SQRT2 - cubeSize * 2;
+  const initialX = -spaceWidth / 8;
+  const cubeX = initialX + (cubeHorizontalDistance * (positionX - 1)) / 2;
+  const cubeY = initialY - cubeVerticalDistance * positionY;
+  return getIsometricCoordinates(cubeX, cubeY);
+};
+
+const Connections: FC<{ connections: BlockConnection[] }> = ({
   connections,
 }) => {
+  const points: [number, number, number][] = [];
+  const topConnectionSize =
+    connections.includes(BlockConnection.LEFT) ||
+    connections.includes(BlockConnection.RIGHT)
+      ? cubeSize * Math.SQRT2
+      : cubeSize * Math.SQRT2 * 2;
+
+  if (connections.includes(BlockConnection.BOTTOM)) {
+    points.push([0, 0, 0], [0, topConnectionSize, 0]);
+  }
+
+  if (connections.includes(BlockConnection.LEFT)) {
+    points.push(
+      [0, cubeSize * Math.SQRT2, 0],
+      [
+        (-cubeHorizontalDistance * Math.SQRT2) / 2,
+        cubeSize * Math.SQRT2,
+        (cubeHorizontalDistance * Math.SQRT2) / 2,
+      ]
+    );
+  }
+
+  if (connections.includes(BlockConnection.RIGHT)) {
+    points.push(
+      [0, (cubeSize * Math.SQRT2) / 2, 0],
+      [
+        cubeSize * 2 * Math.SQRT2,
+        cubeSize * Math.SQRT2,
+        -cubeSize * 2 * Math.SQRT2,
+      ]
+    );
+  }
+  return <Line points={points} segments color={"#FFFFFF"} />;
+};
+
+const BlockRender: FC<{
+  block: Block;
+}> = ({ block }) => {
   const { height, width } = useContext(DimensionsContext);
-  const initialCubeY = height / 2 - cubeSize * 2;
   const innerCubeSize = cubeSize * 0.65;
-  const [anchorX, anchorY, anchorZ] = getIsometricCoordinates(
-    -width / 8,
-    initialCubeY - (blockHeight - 1) * blockSpace
+  const [anchorX, anchorY, anchorZ] = getAnchorsFromPosition(
+    block.position,
+    width,
+    height
   );
+  const connections = getConnections(block);
   return (
     <group position={[anchorX, anchorY, anchorZ]}>
       <Billboard position={[cubeSize, cubeSize + 5, 0]}>
@@ -58,7 +112,7 @@ const BlockRender: FC<{ block: Block; connections: BlockConnection[] }> = ({
             </Circle>
           </mesh>
           <Text fontSize={12} font="/assets/fonts/Inter-Regular.ttf">
-            {id}
+            {block.id}
           </Text>
         </Center>
       </Billboard>
@@ -83,44 +137,39 @@ const BlockRender: FC<{ block: Block; connections: BlockConnection[] }> = ({
           clearcoat={1}
         />
       </RoundedBox>
-      {connections.includes(BlockConnection.BOTTOM) && (
-        <Line
-          points={[
-            0,
-            // Centering the connection line to the bottom of the cube, accounting for the isometric angle correction
-            -cubeSize + cubeSize * Math.SQRT2 - cubeSize,
-            0,
-            0,
-            -cubeSize - blockSpace / 2,
-            0,
-          ]}
-          color={"#CCCCCC"}
-        />
-      )}
+      <Connections connections={connections} />
     </group>
   );
 };
 
+const getConnections: (block: Block) => BlockConnection[] = (block) => {
+  if (block.parent === undefined) {
+    return [];
+  }
+  if (block.parent.position.horizontal === block.position.horizontal) {
+    return [BlockConnection.BOTTOM];
+  }
+  if (block.parent.position.horizontal < block.position.horizontal) {
+    return [BlockConnection.BOTTOM, BlockConnection.LEFT];
+  }
+  if (block.parent.position.horizontal > block.position.horizontal) {
+    return [BlockConnection.BOTTOM, BlockConnection.RIGHT];
+  }
+  return [];
+};
+
 export const BlockchainRender: FC<{
   chain: Blockchain<Chain.STX>;
-  initialConnection: BlockConnection[];
-}> = ({ chain, initialConnection = [] }) => {
+}> = ({ chain }) => {
   const { block, children } = chain;
-  const blockConnection =
-    children.length > 0 ? [...initialConnection, BlockConnection.BOTTOM] : [];
   return (
     <group>
-      <BlockRender block={block} connections={blockConnection} />
-      {children.map((childrenBlock, index) => {
-        const childrenBlockConnection =
-          index >= 1 && index % 2 === 0
-            ? [BlockConnection.LEFT]
-            : [BlockConnection.RIGHT];
+      <BlockRender block={block} />
+      {children.map((childrenBlock) => {
         return (
           <BlockchainRender
             key={childrenBlock.block.id}
             chain={childrenBlock}
-            initialConnection={childrenBlockConnection}
           />
         );
       })}
