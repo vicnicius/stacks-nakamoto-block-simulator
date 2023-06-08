@@ -45,8 +45,8 @@ const getAnchorsFromPosition: (
   const { vertical: positionY, horizontal: positionX } = position;
   const initialY = (spaceHeight / 2) * Math.SQRT2 - cubeSize * 2;
   const initialX = -spaceWidth / 8;
-  const cubeX = initialX + (cubeHorizontalDistance * (positionX - 1)) / 2;
-  const cubeY = initialY - cubeVerticalDistance * positionY;
+  const cubeX = initialX + (cubeHorizontalDistance * positionX) / 2;
+  const cubeY = initialY - cubeVerticalDistance * (positionY + 1);
   return getIsometricCoordinates(cubeX, cubeY);
 };
 
@@ -77,11 +77,11 @@ const Connections: FC<{ connections: BlockConnection[] }> = ({
 
   if (connections.includes(BlockConnection.RIGHT)) {
     points.push(
-      [0, (cubeSize * Math.SQRT2) / 2, 0],
+      [0, cubeSize * Math.SQRT2, 0],
       [
-        cubeSize * 2 * Math.SQRT2,
+        (cubeHorizontalDistance * Math.SQRT2) / 2,
         cubeSize * Math.SQRT2,
-        -cubeSize * 2 * Math.SQRT2,
+        -(cubeHorizontalDistance * Math.SQRT2) / 2,
       ]
     );
   }

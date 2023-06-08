@@ -21,7 +21,7 @@ export const Canvas: FC = () => {
   const blockchain: Blockchain<Chain.STX> = {
     block: {
       id: "0",
-      position: { vertical: 1, horizontal: 1 },
+      position: { vertical: 0, horizontal: 0 },
       type: Chain.STX,
       state: StacksBlockState.NEW,
     },
@@ -30,23 +30,73 @@ export const Canvas: FC = () => {
       {
         block: {
           id: "1",
-          parent: { id: "0", position: { vertical: 1, horizontal: 1 } },
-          position: { vertical: 2, horizontal: 1 },
+          parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
+          position: { vertical: 1, horizontal: 0 },
           type: Chain.STX,
           state: StacksBlockState.NEW,
         },
         actions: [],
-        children: [],
+        children: [
+          {
+            actions: [],
+            block: {
+              id: "5",
+              parent: { id: "1", position: { vertical: 1, horizontal: 0 } },
+              position: { vertical: 2, horizontal: 0 },
+              type: Chain.STX,
+              state: StacksBlockState.NEW,
+            },
+            children: [
+              {
+                actions: [],
+                block: {
+                  id: "6",
+                  parent: {
+                    id: "5",
+                    position: { vertical: 2, horizontal: 0 },
+                  },
+                  position: { vertical: 3, horizontal: 0 },
+                  type: Chain.STX,
+                  state: StacksBlockState.NEW,
+                },
+                children: [],
+              },
+            ],
+          },
+        ],
       },
       {
         block: {
           id: "2",
-          parent: { id: "0", position: { vertical: 1, horizontal: 1 } },
-          position: { vertical: 2, horizontal: 2 },
+          parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
+          position: { vertical: 1, horizontal: 1 },
           type: Chain.STX,
           state: StacksBlockState.NEW,
         },
         actions: [],
+        children: [
+          {
+            actions: [],
+            block: {
+              id: "3",
+              parent: { id: "2", position: { vertical: 1, horizontal: 1 } },
+              position: { vertical: 2, horizontal: 1 },
+              type: Chain.STX,
+              state: StacksBlockState.NEW,
+            },
+            children: [],
+          },
+        ],
+      },
+      {
+        actions: [],
+        block: {
+          id: "4",
+          parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
+          position: { vertical: 1, horizontal: -1 },
+          type: Chain.STX,
+          state: StacksBlockState.NEW,
+        },
         children: [],
       },
     ],
