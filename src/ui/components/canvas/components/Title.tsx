@@ -1,10 +1,13 @@
 import { Text } from "@react-three/drei";
-import React, { FC, useContext } from "react";
-import { DimensionsContext, fontSize } from "../../../../domain/Dimensions";
-import { layout } from "../helpers";
+import React, { FC, PropsWithChildren } from "react";
+import { fontSize } from "../../../../domain/Dimensions";
 
-export const Title: FC = () => {
-  const { height } = useContext(DimensionsContext);
+export const Title: FC<
+  PropsWithChildren<{
+    position: [number, number, number];
+    anchor: "left" | "right";
+  }>
+> = ({ anchor, children, position }) => {
   return (
     <Text
       color={"#FFFFFF"}
@@ -12,10 +15,10 @@ export const Title: FC = () => {
       font="Inter"
       textAlign="right"
       anchorY="top"
-      anchorX="right"
-      position={[-layout.defaultMargin / 2, height / 2, 0]}
+      anchorX={anchor}
+      position={position}
     >
-      Stacks
+      {children}
     </Text>
   );
 };
