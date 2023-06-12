@@ -12,6 +12,7 @@ import { HUDScene } from "./HUDScene";
 import { AxesHelper } from "./components/AxesHelper";
 import { Camera } from "./components/Camera";
 import { GridHelper } from "./components/GridHelper";
+import { Lights } from "./components/Lights";
 import { colors } from "./helpers";
 
 // The Blockchain interface describes the data structure that we will use to render the blocks.
@@ -184,7 +185,7 @@ export const Canvas: FC = () => {
   return (
     <section className="CanvasWrapper">
       <FiberCanvas dpr={[1, 2]} style={{ height, width }}>
-        <color attach={"background"} args={["#151515"]} />
+        <color attach={"background"} args={[colors.baseGray]} />
         <Environment
           background
           blur={1}
@@ -193,20 +194,7 @@ export const Canvas: FC = () => {
           files={"/assets/environments/studio.hdr"}
           resolution={256}
         >
-          <spotLight
-            position={[-width * Math.SQRT2, 0, width * Math.SQRT2]}
-            color={colors.lightPurple}
-            decay={1}
-            intensity={10}
-            distance={width * 2}
-          />
-          <spotLight
-            position={[width * Math.SQRT2, 0, -width * Math.SQRT2]}
-            color={colors.lightYellow}
-            decay={1}
-            intensity={10}
-            distance={width * 2}
-          />
+          <Lights />
           <Camera isometric />
           <BlockchainRender chain={stacksChain} />
           <BlockchainRender chain={bitcoinChain} />

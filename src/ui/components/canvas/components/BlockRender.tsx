@@ -18,6 +18,7 @@ import {
   cubeSize,
 } from "../../../../domain/Dimensions";
 import { colors } from "../helpers";
+import { Color } from "three";
 
 function getIsometricCoordinates(
   horizontalDistance: number,
@@ -83,7 +84,7 @@ const Connections: FC<{ connections: BlockConnection[] }> = ({
       ]
     );
   }
-  return <Line points={points} segments color={colors.lightGray} />;
+  return <Line points={points} segments color={colors.gray} />;
 };
 
 const getConnections: (block: Block) => BlockConnection[] = (block) => {
