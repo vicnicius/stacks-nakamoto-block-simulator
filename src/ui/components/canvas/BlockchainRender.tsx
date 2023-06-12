@@ -6,18 +6,12 @@ import { BlockRender } from "./components/BlockRender";
 export const BlockchainRender: FC<{
   chain: Blockchain<Chain.STX | Chain.BTC>;
 }> = ({ chain }) => {
-  const { block, children } = chain;
+  const { blocks } = chain;
   return (
     <group>
-      <BlockRender block={block} />
-      {children.map((childrenBlock) => {
-        return (
-          <BlockchainRender
-            key={childrenBlock.block.id}
-            chain={childrenBlock}
-          />
-        );
-      })}
+      {Object.keys(blocks).map((id) => (
+        <BlockRender key={id} block={blocks[id]} id={id} chain={chain} />
+      ))}
     </group>
   );
 };

@@ -18,164 +18,91 @@ import { colors } from "./helpers";
 // The Blockchain interface describes the data structure that we will use to render the blocks.
 // Each block can have a number of children blocks, and each block has it's own state.
 const stacksChain: Blockchain<Chain.STX> = {
-  block: {
-    id: "0",
-    position: { vertical: 0, horizontal: 0 },
-    type: Chain.STX,
-    state: StacksBlockState.NEW,
+  blocks: {
+    0: {
+      position: { vertical: 0, horizontal: 0 },
+      type: Chain.STX,
+      state: StacksBlockState.NEW,
+    },
+    1: {
+      parentId: "0",
+      position: { vertical: 1, horizontal: 0 },
+      type: Chain.STX,
+      state: StacksBlockState.NEW,
+    },
+    2: {
+      parentId: "0",
+      position: { vertical: 1, horizontal: 1 },
+      type: Chain.STX,
+      state: StacksBlockState.NEW,
+    },
+    3: {
+      parentId: "2",
+      position: { vertical: 2, horizontal: 1 },
+      type: Chain.STX,
+      state: StacksBlockState.NEW,
+    },
+    4: {
+      parentId: "0",
+      position: { vertical: 1, horizontal: -1 },
+      type: Chain.STX,
+      state: StacksBlockState.NEW,
+    },
+    5: {
+      parentId: "1",
+      position: { vertical: 2, horizontal: 0 },
+      type: Chain.STX,
+      state: StacksBlockState.NEW,
+    },
+    6: {
+      parentId: "5",
+      position: { vertical: 3, horizontal: 0 },
+      type: Chain.STX,
+      state: StacksBlockState.NEW,
+    },
   },
   actions: [BlockAction.MINE, BlockAction.MINE],
-  children: [
-    {
-      block: {
-        id: "1",
-        parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
-        position: { vertical: 1, horizontal: 0 },
-        type: Chain.STX,
-        state: StacksBlockState.NEW,
-      },
-      actions: [],
-      children: [
-        {
-          actions: [],
-          block: {
-            id: "5",
-            parent: { id: "1", position: { vertical: 1, horizontal: 0 } },
-            position: { vertical: 2, horizontal: 0 },
-            type: Chain.STX,
-            state: StacksBlockState.NEW,
-          },
-          children: [
-            {
-              actions: [],
-              block: {
-                id: "6",
-                parent: {
-                  id: "5",
-                  position: { vertical: 2, horizontal: 0 },
-                },
-                position: { vertical: 3, horizontal: 0 },
-                type: Chain.STX,
-                state: StacksBlockState.NEW,
-              },
-              children: [],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      block: {
-        id: "2",
-        parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
-        position: { vertical: 1, horizontal: 1 },
-        type: Chain.STX,
-        state: StacksBlockState.NEW,
-      },
-      actions: [],
-      children: [
-        {
-          actions: [],
-          block: {
-            id: "3",
-            parent: { id: "2", position: { vertical: 1, horizontal: 1 } },
-            position: { vertical: 2, horizontal: 1 },
-            type: Chain.STX,
-            state: StacksBlockState.NEW,
-          },
-          children: [],
-        },
-      ],
-    },
-    {
-      actions: [],
-      block: {
-        id: "4",
-        parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
-        position: { vertical: 1, horizontal: -1 },
-        type: Chain.STX,
-        state: StacksBlockState.NEW,
-      },
-      children: [],
-    },
-  ],
 };
 
 const bitcoinChain: Blockchain<Chain.BTC> = {
   actions: [],
-  block: {
-    id: "0",
-    position: { vertical: 0, horizontal: 0 },
-    type: Chain.BTC,
+  blocks: {
+    0: {
+      position: { vertical: 0, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    1: {
+      parentId: "0",
+      position: { vertical: 1, horizontal: 0 },
+      type: Chain.BTC,
+    },
+
+    2: {
+      parentId: "0",
+      position: { vertical: 1, horizontal: 1 },
+      type: Chain.BTC,
+    },
+    3: {
+      parentId: "2",
+      position: { vertical: 2, horizontal: 1 },
+      type: Chain.BTC,
+    },
+    4: {
+      parentId: "0",
+      position: { vertical: 1, horizontal: -1 },
+      type: Chain.BTC,
+    },
+    5: {
+      parentId: "1",
+      position: { vertical: 2, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    6: {
+      parentId: "5",
+      position: { vertical: 3, horizontal: 0 },
+      type: Chain.BTC,
+    },
   },
-  children: [
-    {
-      block: {
-        id: "1",
-        parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
-        position: { vertical: 1, horizontal: 0 },
-        type: Chain.BTC,
-      },
-      actions: [],
-      children: [
-        {
-          actions: [],
-          block: {
-            id: "5",
-            parent: { id: "1", position: { vertical: 1, horizontal: 0 } },
-            position: { vertical: 2, horizontal: 0 },
-            type: Chain.BTC,
-          },
-          children: [
-            {
-              actions: [],
-              block: {
-                id: "6",
-                parent: {
-                  id: "5",
-                  position: { vertical: 2, horizontal: 0 },
-                },
-                position: { vertical: 3, horizontal: 0 },
-                type: Chain.BTC,
-              },
-              children: [],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      block: {
-        id: "2",
-        parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
-        position: { vertical: 1, horizontal: 1 },
-        type: Chain.BTC,
-      },
-      actions: [],
-      children: [
-        {
-          actions: [],
-          block: {
-            id: "3",
-            parent: { id: "2", position: { vertical: 1, horizontal: 1 } },
-            position: { vertical: 2, horizontal: 1 },
-            type: Chain.BTC,
-          },
-          children: [],
-        },
-      ],
-    },
-    {
-      actions: [],
-      block: {
-        id: "4",
-        parent: { id: "0", position: { vertical: 0, horizontal: 0 } },
-        position: { vertical: 1, horizontal: -1 },
-        type: Chain.BTC,
-      },
-      children: [],
-    },
-  ],
 };
 
 export const Canvas: FC = () => {

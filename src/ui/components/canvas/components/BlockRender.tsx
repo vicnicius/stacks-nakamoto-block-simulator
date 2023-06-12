@@ -12,13 +12,13 @@ import {
 import React, { FC, useContext } from "react";
 import { Block, BlockPosition, Chain } from "../../../../domain/Block";
 import { BlockConnection } from "../../../../domain/BlockConnection";
+import { Blockchain } from "../../../../domain/Blockchain";
 import {
   DimensionsContext,
   blockSpace,
   cubeSize,
 } from "../../../../domain/Dimensions";
 import { colors } from "../helpers";
-import { Color } from "three";
 
 function getIsometricCoordinates(
   horizontalDistance: number,
@@ -87,25 +87,31 @@ const Connections: FC<{ connections: BlockConnection[] }> = ({
   return <Line points={points} segments color={colors.gray} />;
 };
 
-const getConnections: (block: Block) => BlockConnection[] = (block) => {
-  if (block.parent === undefined) {
+const getConnections: (
+  block: Block,
+  chain: Blockchain<Chain.BTC | Chain.STX>
+) => BlockConnection[] = (block, chain) => {
+  const parent = block.parentId ? chain.blocks[block.parentId] : undefined;
+  if (parent === undefined) {
     return [];
   }
-  if (block.parent.position.horizontal === block.position.horizontal) {
+  if (parent.position.horizontal === block.position.horizontal) {
     return [BlockConnection.BOTTOM];
   }
-  if (block.parent.position.horizontal < block.position.horizontal) {
+  if (parent.position.horizontal < block.position.horizontal) {
     return [BlockConnection.BOTTOM, BlockConnection.LEFT];
   }
-  if (block.parent.position.horizontal > block.position.horizontal) {
+  if (parent.position.horizontal > block.position.horizontal) {
     return [BlockConnection.BOTTOM, BlockConnection.RIGHT];
   }
   return [];
 };
 
 export const BlockRender: FC<{
+  id: string;
   block: Block;
-}> = ({ block }) => {
+  chain: Blockchain<Chain.STX | Chain.BTC>;
+}> = ({ block, id, chain }) => {
   const { height, width } = useContext(DimensionsContext);
   const innerCubeSize = cubeSize * 0.65;
   const [anchorX, anchorY, anchorZ] = getAnchorsFromPosition(
@@ -120,7 +126,7 @@ export const BlockRender: FC<{
       : [colors.darkYellow, colors.lightYellow];
   const outerBlockColor =
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
-  const connections = getConnections(block);
+  const connections = getConnections(block, chain);
   return (
     <group position={[anchorX, anchorY, anchorZ]}>
       <Billboard position={[cubeSize, cubeSize + 5, 0]}>
@@ -134,7 +140,7 @@ export const BlockRender: FC<{
             </Circle>
           </mesh>
           <Text fontSize={12} font="/assets/fonts/Inter-Regular.ttf">
-            {block.id}
+            {id}
           </Text>
         </Center>
       </Billboard>

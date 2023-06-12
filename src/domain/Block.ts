@@ -14,12 +14,8 @@ export type BlockPosition = { vertical: number; horizontal: number };
 
 interface CommonBlock<T extends Chain> {
   type: T;
-  id: string;
   position: BlockPosition;
-  parent?: {
-    id: string;
-    position: BlockPosition;
-  };
+  parentId?: string;
 }
 
 export enum StacksBlockState {
