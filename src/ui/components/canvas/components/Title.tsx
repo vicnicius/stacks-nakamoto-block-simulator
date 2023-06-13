@@ -12,7 +12,7 @@ export const Title: FC<
     <Text
       color={"#FFFFFF"}
       fontSize={fontSize.regular}
-      font="Inter"
+      font="/assets/fonts/Inter-Regular.ttf"
       textAlign="right"
       anchorY="top"
       anchorX={anchor}

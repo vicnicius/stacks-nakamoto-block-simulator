@@ -1,6 +1,6 @@
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas as FiberCanvas } from "@react-three/fiber";
-import React, { FC, useContext } from "react";
+import React, { FC, WheelEventHandler, useContext, useState } from "react";
 import { Chain, StacksBlockState } from "../../../domain/Block";
 import { BlockAction } from "../../../domain/BlockAction";
 import { Blockchain } from "../../../domain/Blockchain";
@@ -102,16 +102,65 @@ const bitcoinChain: Blockchain<Chain.BTC> = {
       position: { vertical: 3, horizontal: 0 },
       type: Chain.BTC,
     },
+    7: {
+      parentId: "6",
+      position: { vertical: 4, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    8: {
+      parentId: "7",
+      position: { vertical: 5, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    9: {
+      parentId: "8",
+      position: { vertical: 6, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    10: {
+      parentId: "9",
+      position: { vertical: 7, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    11: {
+      parentId: "10",
+      position: { vertical: 8, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    12: {
+      parentId: "11",
+      position: { vertical: 9, horizontal: 0 },
+      type: Chain.BTC,
+    },
+    13: {
+      parentId: "12",
+      position: { vertical: 10, horizontal: 0 },
+      type: Chain.BTC,
+    },
   },
 };
 
 export const Canvas: FC = () => {
   const { height, width } = useContext(DimensionsContext);
   const { debug } = useContext(DebugContext);
+  const [leftTranslateY, setLeftTranslateY] = useState(0);
+  const [rightTranslateY, setRightTranslateY] = useState(0);
+  const handleScroll: WheelEventHandler = ({ deltaY, pageX }) => {
+    if (pageX < width / 2) {
+      setLeftTranslateY(leftTranslateY + deltaY);
+    }
+    if (pageX > width / 2) {
+      setRightTranslateY(rightTranslateY + deltaY);
+    }
+  };
 
   return (
     <section className="CanvasWrapper">
-      <FiberCanvas dpr={[1, 2]} style={{ height, width }}>
+      <FiberCanvas
+        dpr={[1, 2]}
+        style={{ height, width }}
+        onWheel={handleScroll}
+      >
         <color attach={"background"} args={[colors.baseGray]} />
         <Environment
           background
@@ -123,8 +172,8 @@ export const Canvas: FC = () => {
         >
           <Lights />
           <Camera isometric />
-          <BlockchainRender chain={stacksChain} />
-          <BlockchainRender chain={bitcoinChain} />
+          <BlockchainRender chain={stacksChain} translateY={leftTranslateY} />
+          <BlockchainRender chain={bitcoinChain} translateY={rightTranslateY} />
           <HUDScene />
           <GridHelper />
           <AxesHelper />
