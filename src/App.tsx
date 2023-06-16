@@ -26,6 +26,11 @@ export const App: FC = () => {
   const [sceneWidth, setSceneWidth] = useState(0);
   // The sceneHeight sets the whole height of the scene in its own coordinate unit
   const [sceneHeight, setSceneHeight] = useState(0);
+  // The maxYLeftScroll sets the maximum amount of pixels that the user can scroll
+  const [maxYLeftScroll, setMaxYLeftScroll] = useState(9999);
+  // the maxYRightScroll sets the maximum amount of pixels that the user can scroll
+  const [maxYRightScroll, setMaxYRightScroll] = useState(9999);
+
   const aspect = width / height;
   useEffect(() => {
     const handleResize = () => {
@@ -80,8 +85,12 @@ export const App: FC = () => {
           aspect,
           sceneHeight,
           sceneWidth,
+          maxYLeftScroll,
+          maxYRightScroll,
           setSceneHeight,
           setSceneWidth,
+          setMaxYLeftScroll,
+          setMaxYRightScroll,
         }}
       >
         <DebugContext.Provider value={{ debug: debugMode }}>

@@ -1,6 +1,7 @@
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas as FiberCanvas } from "@react-three/fiber";
-import React, { FC, WheelEventHandler, useContext, useState } from "react";
+import throttle from "lodash/throttle";
+import React, { FC, useContext, useState } from "react";
 import { Chain, StacksBlockState } from "../../../domain/Block";
 import { BlockAction } from "../../../domain/BlockAction";
 import { Blockchain } from "../../../domain/Blockchain";
@@ -18,6 +19,7 @@ import { colors } from "./helpers";
 // The Blockchain interface describes the data structure that we will use to render the blocks.
 // Each block can have a number of children blocks, and each block has it's own state.
 const stacksChain: Blockchain<Chain.STX> = {
+  name: "stacks",
   blocks: {
     0: {
       position: { vertical: 0, horizontal: 0 },
@@ -65,6 +67,7 @@ const stacksChain: Blockchain<Chain.STX> = {
 };
 
 const bitcoinChain: Blockchain<Chain.BTC> = {
+  name: "bitcoin",
   actions: [],
   blocks: {
     0: {
@@ -140,26 +143,67 @@ const bitcoinChain: Blockchain<Chain.BTC> = {
   },
 };
 
+const handleScroll = throttle(
+  ({
+    deltaY,
+    pageX,
+    width,
+    leftTranslateY,
+    rightTranslateY,
+    setLeftTranslateY,
+    setRightTranslateY,
+    maxYLeftScroll,
+    maxYRightScroll,
+    nativeEvent,
+  }) => {
+    nativeEvent.preventDefault();
+    const newLeftTranslateY = deltaY + leftTranslateY;
+    if (
+      pageX < width / 2 &&
+      newLeftTranslateY >= 0 &&
+      newLeftTranslateY < maxYLeftScroll
+    ) {
+      setLeftTranslateY(newLeftTranslateY);
+    }
+    const newRightTranslateY = deltaY + rightTranslateY;
+    if (
+      pageX > width / 2 &&
+      newRightTranslateY >= 0 &&
+      newRightTranslateY < maxYRightScroll
+    ) {
+      setRightTranslateY(newRightTranslateY);
+    }
+  },
+  250,
+  { leading: true }
+);
+
 export const Canvas: FC = () => {
-  const { height, width } = useContext(DimensionsContext);
+  const { height, width, maxYRightScroll, maxYLeftScroll } =
+    useContext(DimensionsContext);
   const { debug } = useContext(DebugContext);
   const [leftTranslateY, setLeftTranslateY] = useState(0);
   const [rightTranslateY, setRightTranslateY] = useState(0);
-  const handleScroll: WheelEventHandler = ({ deltaY, pageX }) => {
-    if (pageX < width / 2) {
-      setLeftTranslateY(leftTranslateY + deltaY);
-    }
-    if (pageX > width / 2) {
-      setRightTranslateY(rightTranslateY + deltaY);
-    }
-  };
 
   return (
     <section className="CanvasWrapper">
       <FiberCanvas
         dpr={[1, 2]}
         style={{ height, width }}
-        onWheel={handleScroll}
+        onWheel={({ deltaY, pageX, nativeEvent }) =>
+          handleScroll({
+            deltaY,
+            pageX,
+            width,
+            leftTranslateY,
+            rightTranslateY,
+            maxYLeftScroll,
+            maxYRightScroll,
+            setLeftTranslateY,
+            setRightTranslateY,
+            nativeEvent,
+          })
+        }
       >
         <color attach={"background"} args={[colors.baseGray]} />
         <Environment
