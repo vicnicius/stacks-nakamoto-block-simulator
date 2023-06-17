@@ -13,3 +13,7 @@ export const colors = {
   darkPurple: "#4234E9",
   lightPurple: "#DCD9FA",
 };
+
+export const fonts = {
+  regular: "/assets/fonts/Inter-Regular.ttf",
+};

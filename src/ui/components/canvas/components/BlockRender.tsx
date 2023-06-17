@@ -1,15 +1,12 @@
+import { useSpring, animated } from "@react-spring/three";
 import {
-  Billboard,
-  Center,
-  Circle,
-  RoundedBox,
   GradientTexture,
   Edges,
   MeshTransmissionMaterial,
   Line,
-  Text,
+  Box,
 } from "@react-three/drei";
-import React, { FC, useContext } from "react";
+import React, { FC, useContext, useState } from "react";
 import { Block, BlockPosition, Chain } from "../../../../domain/Block";
 import { BlockConnection } from "../../../../domain/BlockConnection";
 import { Blockchain } from "../../../../domain/Blockchain";
@@ -19,6 +16,7 @@ import {
   cubeSize,
 } from "../../../../domain/Dimensions";
 import { colors } from "../helpers";
+import { BlockLabel } from "./BlockLabel";
 
 function getIsometricCoordinates(
   horizontalDistance: number,
@@ -107,12 +105,28 @@ const getConnections: (
   return [];
 };
 
+const AnimatedGroup = animated.group;
+const AnimatedBox = animated(Box);
+const AnimatedEdges = animated(Edges);
+
 export const BlockRender: FC<{
   id: string;
   block: Block;
   chain: Blockchain<Chain.STX | Chain.BTC>;
 }> = ({ block, id, chain }) => {
   const { height, width } = useContext(DimensionsContext);
+  const [isHovering, setIsHovering] = useState(false);
+  const outerCubeSpring = useSpring({
+    rotation: isHovering
+      ? [0, Math.PI, 0]
+      : ([0, 0, 0] as [number, number, number]),
+  });
+  const innerCubeSpring = useSpring({
+    rotation: isHovering ? [0, -Math.PI / 2, 0] : [0, 0, 0],
+  });
+  const edgesSpring = useSpring({
+    scale: isHovering ? 1.25 : 1,
+  });
   const innerCubeSize = cubeSize * 0.65;
   const [anchorX, anchorY, anchorZ] = getAnchorsFromPosition(
     block.position,
@@ -128,32 +142,39 @@ export const BlockRender: FC<{
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
   const connections = getConnections(block, chain);
   return (
-    <group position={[anchorX, anchorY, anchorZ]}>
-      <Billboard position={[cubeSize, cubeSize + 5, 0]}>
-        <Center>
-          <mesh>
-            <Circle args={[10]}>
-              <meshBasicMaterial color={colors.white} />
-            </Circle>
-            <Circle args={[9]}>
-              <meshBasicMaterial color={colors.black} />
-            </Circle>
-          </mesh>
-          <Text fontSize={12} font="/assets/fonts/Inter-Regular.ttf">
-            {id}
-          </Text>
-        </Center>
-      </Billboard>
-      <RoundedBox
+    <AnimatedGroup
+      position={[anchorX, anchorY, anchorZ]}
+      onPointerEnter={() => setIsHovering(true)}
+      onPointerLeave={() => setIsHovering(false)}
+    >
+      <BlockLabel cubeSize={cubeSize} id={id} />
+      <AnimatedBox
         args={[innerCubeSize, innerCubeSize, innerCubeSize]}
-        radius={0.5}
+        // @FIXME: fix this type casting
+        rotation={
+          innerCubeSpring.rotation as unknown as [
+            x: number,
+            y: number,
+            z: number
+          ]
+        }
       >
         <meshBasicMaterial>
           <GradientTexture stops={[0, 1]} colors={innerBlockColor} />
         </meshBasicMaterial>
         <Edges color={colors.white} scale={1} />
-      </RoundedBox>
-      <RoundedBox args={[cubeSize, cubeSize, cubeSize]} radius={0.5}>
+      </AnimatedBox>
+      <AnimatedBox
+        args={[cubeSize, cubeSize, cubeSize]}
+        // @FIXME: fix this type casting
+        rotation={
+          outerCubeSpring.rotation as unknown as [
+            x: number,
+            y: number,
+            z: number
+          ]
+        }
+      >
         <MeshTransmissionMaterial
           color={outerBlockColor}
           transmission={0.5}
@@ -164,8 +185,9 @@ export const BlockRender: FC<{
           temporalDistortion={0.5}
           clearcoat={1}
         />
-      </RoundedBox>
+        <AnimatedEdges color={colors.white} scale={edgesSpring.scale} />
+      </AnimatedBox>
       <Connections connections={connections} />
-    </group>
+    </AnimatedGroup>
   );
 };

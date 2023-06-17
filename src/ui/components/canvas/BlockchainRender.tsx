@@ -38,7 +38,7 @@ export const BlockchainRender: FC<{
       : translateY;
   const { position } = useSpring({
     position: [0, y, 0],
-    config: { mass: 0.25, tension: 5, friction: 5, precision: 0.0001 },
+    config: { mass: 0, tension: 0, friction: 1, precision: 0.0001 },
   });
   const { blocks } = chain;
   return (
