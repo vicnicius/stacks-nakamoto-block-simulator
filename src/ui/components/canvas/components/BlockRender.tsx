@@ -147,7 +147,7 @@ export const BlockRender: FC<{
       onPointerEnter={() => setIsHovering(true)}
       onPointerLeave={() => setIsHovering(false)}
     >
-      <BlockLabel cubeSize={cubeSize} id={id} />
+      <BlockLabel isHovering={isHovering} cubeSize={cubeSize} id={id} />
       <AnimatedBox
         args={[innerCubeSize, innerCubeSize, innerCubeSize]}
         // @FIXME: fix this type casting

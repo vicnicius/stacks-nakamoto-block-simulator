@@ -1,15 +1,30 @@
+import { animated, useSpring } from "@react-spring/three";
 import { Billboard, Center, Circle, Text } from "@react-three/drei";
 import React, { FC } from "react";
 import { colors, fonts } from "../helpers";
 
 interface BlockLabelProps {
+  isHovering: boolean;
   cubeSize: number;
   id: string;
 }
 
-export const BlockLabel: FC<BlockLabelProps> = ({ cubeSize, id }) => {
+const AnimatedBillboard = animated(Billboard);
+
+export const BlockLabel: FC<BlockLabelProps> = ({
+  cubeSize,
+  id,
+  isHovering,
+}) => {
+  const spring = useSpring({
+    position: isHovering
+      ? [cubeSize + 10, cubeSize + 15, 0]
+      : [cubeSize, cubeSize + 5, 0],
+  });
   return (
-    <Billboard position={[cubeSize, cubeSize + 5, 0]}>
+    <AnimatedBillboard
+      position={spring.position as unknown as [number, number, number]}
+    >
       <Center>
         <mesh>
           <Circle args={[10]}>
@@ -23,6 +38,6 @@ export const BlockLabel: FC<BlockLabelProps> = ({ cubeSize, id }) => {
           {id}
         </Text>
       </Center>
-    </Billboard>
+    </AnimatedBillboard>
   );
 };
