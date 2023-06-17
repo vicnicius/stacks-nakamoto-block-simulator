@@ -1,4 +1,4 @@
-import { animated, useSpring } from "@react-spring/three";
+import { animated, useSpring, config } from "@react-spring/three";
 import { Billboard, Center, Circle, Text } from "@react-three/drei";
 import React, { FC } from "react";
 import { colors, fonts } from "../helpers";
@@ -16,14 +16,21 @@ export const BlockLabel: FC<BlockLabelProps> = ({
   id,
   isHovering,
 }) => {
-  const spring = useSpring({
+  const scaleSpring = useSpring({
+    from: { scale: 0 },
+    to: { scale: 1 },
+    delay: 350,
+    config: config.wobbly,
+  });
+  const positionSpring = useSpring({
     position: isHovering
       ? [cubeSize + 10, cubeSize + 15, 0]
       : [cubeSize, cubeSize + 5, 0],
   });
   return (
     <AnimatedBillboard
-      position={spring.position as unknown as [number, number, number]}
+      position={positionSpring.position as unknown as [number, number, number]}
+      scale={scaleSpring.scale}
     >
       <Center>
         <mesh>

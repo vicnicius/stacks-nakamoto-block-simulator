@@ -1,4 +1,4 @@
-import { useSpring, animated } from "@react-spring/three";
+import { useSpring, animated, config } from "@react-spring/three";
 import {
   GradientTexture,
   Edges,
@@ -116,6 +116,11 @@ export const BlockRender: FC<{
 }> = ({ block, id, chain }) => {
   const { height, width } = useContext(DimensionsContext);
   const [isHovering, setIsHovering] = useState(false);
+  const springScale = useSpring({
+    from: { scale: 0 },
+    to: { scale: 1 },
+    config: config.gentle,
+  });
   const outerCubeSpring = useSpring({
     rotation: isHovering
       ? [0, Math.PI, 0]
@@ -158,6 +163,7 @@ export const BlockRender: FC<{
             z: number
           ]
         }
+        scale={springScale.scale}
       >
         <meshBasicMaterial>
           <GradientTexture stops={[0, 1]} colors={innerBlockColor} />
@@ -174,6 +180,7 @@ export const BlockRender: FC<{
             z: number
           ]
         }
+        scale={springScale.scale}
       >
         <MeshTransmissionMaterial
           color={outerBlockColor}
