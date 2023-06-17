@@ -12,7 +12,7 @@ The Stacks Nakamoto release proposes changes to Stacks' consensus algorithm, sig
 
 This project is part of the Stacks Foundation grant program. Documentation and other relevant information can be found on this page: [Stacks Nakamoto Block Simulator Gitbook](https://vini-btc.gitbook.io/stacks-nakamoto-ui-simulator/). The source code for this documentation also live on this repository, in the `/docs` folder.
 
-:warning: :warning: This repository is under heavy development :warning: :warning:
+## :warning: :warning: This repository is under heavy development :warning: :warning:
 
 There's not a lot of structure since most of the code is still in an experimentation phase.
 
