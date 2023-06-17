@@ -1,4 +1,5 @@
 # Stacks Nakamoto Block Simulator
+
 A Stacks block simulator and visualization tool, with educational purposes
 
 ## Introduction
@@ -11,13 +12,15 @@ The Stacks Nakamoto release proposes changes to Stacks' consensus algorithm, sig
 
 This project is part of the Stacks Foundation grant program. Documentation and other relevant information can be found on this page: [Stacks Nakamoto Block Simulator Gitbook](https://vini-btc.gitbook.io/stacks-nakamoto-ui-simulator/). The source code for this documentation also live on this repository, in the `/docs` folder.
 
+:warning: :warning: This repository is under heavy development :warning: :warning:
+
+There's not a lot of structure since most of the code is still in an experimentation phase.
 
 ---
 
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app). You can learn more about it in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
 
 ## Available Scripts
 
