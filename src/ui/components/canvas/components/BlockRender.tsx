@@ -6,7 +6,7 @@ import {
   Line,
   Box,
 } from "@react-three/drei";
-import React, { FC, useContext, useState } from "react";
+import React, { FC, useCallback, useContext, useEffect, useState } from "react";
 import { Block, BlockPosition, Chain } from "../../../../domain/Block";
 import { BlockConnection } from "../../../../domain/BlockConnection";
 import { Blockchain } from "../../../../domain/Blockchain";
@@ -17,6 +17,7 @@ import {
 } from "../../../../domain/Dimensions";
 import { colors } from "../helpers";
 import { BlockLabel } from "./BlockLabel";
+import { BlockPopup } from "./BlockPopup";
 
 function getIsometricCoordinates(
   horizontalDistance: number,
@@ -116,6 +117,21 @@ export const BlockRender: FC<{
 }> = ({ block, id, chain }) => {
   const { height, width } = useContext(DimensionsContext);
   const [isHovering, setIsHovering] = useState(false);
+  useEffect(() => {
+    document.body.style.cursor = isHovering ? "pointer" : "auto";
+  }, [isHovering]);
+  const handleCubeMouseEnter = useCallback(() => {
+    setIsHovering(true);
+  }, []);
+  const handleCubeMouseLeave = useCallback(() => {
+    setIsHovering(false);
+  }, []);
+  const handlePopupMouseEnter = useCallback(() => {
+    setIsHovering(true);
+  }, []);
+  const handlePopupMouseLeave = useCallback(() => {
+    setIsHovering(false);
+  }, []);
   const springScale = useSpring({
     from: { scale: 0 },
     to: { scale: 1 },
@@ -147,11 +163,7 @@ export const BlockRender: FC<{
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
   const connections = getConnections(block, chain);
   return (
-    <AnimatedGroup
-      position={[anchorX, anchorY, anchorZ]}
-      onPointerEnter={() => setIsHovering(true)}
-      onPointerLeave={() => setIsHovering(false)}
-    >
+    <AnimatedGroup position={[anchorX, anchorY, anchorZ]}>
       <BlockLabel isHovering={isHovering} cubeSize={cubeSize} id={id} />
       <AnimatedBox
         args={[innerCubeSize, innerCubeSize, innerCubeSize]}
@@ -181,6 +193,8 @@ export const BlockRender: FC<{
           ]
         }
         scale={springScale.scale}
+        onPointerOver={handleCubeMouseEnter}
+        onPointerOut={handleCubeMouseLeave}
       >
         <MeshTransmissionMaterial
           color={outerBlockColor}
@@ -194,6 +208,16 @@ export const BlockRender: FC<{
         />
         <AnimatedEdges color={colors.white} scale={edgesSpring.scale} />
       </AnimatedBox>
+      <group
+        position={[cubeSize * Math.SQRT1_2, cubeSize, -cubeSize * Math.SQRT1_2]}
+      >
+        <BlockPopup
+          isHovering={isHovering}
+          handleMouseEnter={handlePopupMouseEnter}
+          handleMouseLeave={handlePopupMouseLeave}
+          position={[anchorX, anchorY, anchorZ]}
+        />
+      </group>
       <Connections connections={connections} />
     </AnimatedGroup>
   );
