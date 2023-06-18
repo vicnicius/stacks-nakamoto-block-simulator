@@ -208,9 +208,7 @@ export const BlockRender: FC<{
         />
         <AnimatedEdges color={colors.white} scale={edgesSpring.scale} />
       </AnimatedBox>
-      <group
-        position={[cubeSize * Math.SQRT1_2, cubeSize, -cubeSize * Math.SQRT1_2]}
-      >
+      <group position={[(cubeSize - 8) / 2, cubeSize, -(cubeSize - 8) / 2]}>
         <BlockPopup
           isHovering={isHovering}
           handleMouseEnter={handlePopupMouseEnter}
