@@ -1,4 +1,10 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useReducer, useState } from "react";
+import {
+  UiStateContext,
+  initialBitcoinChain,
+  initialStacksChain,
+  reducer,
+} from "./UiState";
 import { DebugContext } from "./domain/Debug";
 import {
   DimensionsContext,
@@ -75,6 +81,13 @@ export const App: FC = () => {
     }
   }, [metaKeyDown, alternateKeyDown]);
 
+  const [state, dispatch] = useReducer(reducer, {
+    bitcoin: initialBitcoinChain,
+    stacks: initialStacksChain,
+    actions: [],
+    lastId: 1,
+  });
+
   return (
     <main className="App">
       <DimensionsContext.Provider
@@ -94,8 +107,10 @@ export const App: FC = () => {
         }}
       >
         <DebugContext.Provider value={{ debug: debugMode }}>
-          <Header />
-          <Canvas />
+          <UiStateContext.Provider value={{ state, dispatch }}>
+            <Header />
+            <Canvas />
+          </UiStateContext.Provider>
         </DebugContext.Provider>
       </DimensionsContext.Provider>
     </main>

@@ -1,6 +1,6 @@
 export enum Chain {
-  BTC,
-  STX,
+  BTC = "bitcoin",
+  STX = "stacks",
 }
 
 // A block position in the 3D blockchain is made of its vertical position

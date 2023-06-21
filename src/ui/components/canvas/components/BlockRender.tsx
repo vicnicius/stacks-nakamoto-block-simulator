@@ -110,7 +110,7 @@ const AnimatedGroup = animated.group;
 const AnimatedBox = animated(Box);
 const AnimatedEdges = animated(Edges);
 
-export const BlockRender: FC<{
+const Component: FC<{
   id: string;
   block: Block;
   chain: Blockchain<Chain.STX | Chain.BTC>;
@@ -214,9 +214,23 @@ export const BlockRender: FC<{
           handleMouseEnter={handlePopupMouseEnter}
           handleMouseLeave={handlePopupMouseLeave}
           position={[anchorX, anchorY, anchorZ]}
+          blockId={id}
+          chain={block.type}
         />
       </group>
       <Connections connections={connections} />
     </AnimatedGroup>
   );
 };
+
+export const BlockRender = React.memo(Component, (prev, next) => {
+  // We only re-render this component if the type of block being rendered has changed
+  if (
+    prev.block.type === Chain.STX &&
+    next.block.type === Chain.STX &&
+    prev.block.state !== next.block.state
+  ) {
+    return false;
+  }
+  return true;
+});

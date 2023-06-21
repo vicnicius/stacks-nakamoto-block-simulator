@@ -2,8 +2,7 @@ import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas as FiberCanvas } from "@react-three/fiber";
 import throttle from "lodash/throttle";
 import React, { FC, useContext, useState } from "react";
-import { Chain, StacksBlockState } from "../../../domain/Block";
-import { Blockchain } from "../../../domain/Blockchain";
+import { UiStateContext } from "../../../UiState";
 import { DebugContext } from "../../../domain/Debug";
 import { DimensionsContext } from "../../../domain/Dimensions";
 import { BlockchainRender } from "./BlockchainRender";
@@ -14,31 +13,6 @@ import { Camera } from "./components/Camera";
 import { GridHelper } from "./components/GridHelper";
 import { Lights } from "./components/Lights";
 import { colors } from "./helpers";
-
-// The Blockchain interface describes the data structure that we will use to render the blocks.
-// Each block can have a number of children blocks, and each block has it's own state.
-const initialStacksChain: Blockchain<Chain.STX> = {
-  name: "stacks",
-  actions: [],
-  blocks: {
-    1: {
-      position: { vertical: 0, horizontal: 0 },
-      type: Chain.STX,
-      state: StacksBlockState.NEW,
-    },
-  },
-};
-
-const initialBitcoinChain: Blockchain<Chain.BTC> = {
-  name: "bitcoin",
-  actions: [],
-  blocks: {
-    1: {
-      position: { vertical: 0, horizontal: 0 },
-      type: Chain.BTC,
-    },
-  },
-};
 
 const handleScroll = throttle(
   ({
@@ -71,13 +45,14 @@ const handleScroll = throttle(
       setRightTranslateY(newRightTranslateY);
     }
   },
-  250,
+  500,
   { leading: true }
 );
 
 export const Canvas: FC = () => {
   const { height, width, maxYRightScroll, maxYLeftScroll } =
     useContext(DimensionsContext);
+  const { state } = useContext(UiStateContext);
   const { debug } = useContext(DebugContext);
   const [leftTranslateY, setLeftTranslateY] = useState(0);
   const [rightTranslateY, setRightTranslateY] = useState(0);
@@ -113,12 +88,9 @@ export const Canvas: FC = () => {
         >
           <Lights />
           <Camera isometric />
+          <BlockchainRender chain={state.stacks} translateY={leftTranslateY} />
           <BlockchainRender
-            chain={initialStacksChain}
-            translateY={leftTranslateY}
-          />
-          <BlockchainRender
-            chain={initialBitcoinChain}
+            chain={state.bitcoin}
             translateY={rightTranslateY}
           />
           <HUDScene />

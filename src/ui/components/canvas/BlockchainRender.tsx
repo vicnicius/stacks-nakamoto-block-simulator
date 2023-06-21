@@ -6,6 +6,7 @@ import { Blockchain } from "../../../domain/Blockchain";
 import { DimensionsContext, blockSpace } from "../../../domain/Dimensions";
 import { BlockRender } from "./components/BlockRender";
 
+// @TODO: Fix scroll jittering
 export const BlockchainRender: FC<{
   chain: Blockchain<Chain.STX | Chain.BTC>;
   translateY?: number;
