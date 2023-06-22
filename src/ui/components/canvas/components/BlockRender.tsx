@@ -1,13 +1,8 @@
 import { animated, config, useSpring } from "@react-spring/three";
-import {
-  Box,
-  Edges,
-  GradientTexture,
-  Line,
-  MeshTransmissionMaterial,
-} from "@react-three/drei";
+import { Box, Edges, Line, MeshTransmissionMaterial } from "@react-three/drei";
 import { ThreeEvent } from "@react-three/fiber";
 import React, { FC, useCallback, useContext, useEffect, useState } from "react";
+import { BoxGeometry } from "three";
 import { UiStateContext } from "../../../../UiState";
 import { Block, BlockPosition, Chain } from "../../../../domain/Block";
 import { BlockActionType } from "../../../../domain/BlockAction";
@@ -112,6 +107,7 @@ const getConnections: (
 const AnimatedGroup = animated.group;
 const AnimatedBox = animated(Box);
 const AnimatedEdges = animated(Edges);
+const boxGeometry = new BoxGeometry(cubeSize, cubeSize, cubeSize);
 
 const BlockRenderCore: FC<{
   id: string;
@@ -160,23 +156,15 @@ const BlockRenderCore: FC<{
       ? [0, Math.PI, 0]
       : ([0, 0, 0] as [number, number, number]),
   });
-  const innerCubeSpring = useSpring({
-    rotation: isHovering ? [0, -Math.PI / 2, 0] : [0, 0, 0],
-  });
   const edgesSpring = useSpring({
     scale: isHovering ? 1.25 : 1,
   });
-  const innerCubeSize = cubeSize * 0.65;
   const [anchorX, anchorY, anchorZ] = getAnchorsFromPosition(
     block.position,
     width,
     height,
     block.type
   );
-  const innerBlockColor =
-    block.type === Chain.STX
-      ? [colors.darkPurple, colors.lightPurple]
-      : [colors.darkYellow, colors.lightYellow];
   const outerBlockColor =
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
   const connections = getConnections(block, chain);
@@ -187,24 +175,8 @@ const BlockRenderCore: FC<{
     >
       <BlockLabel isHovering={isHovering} cubeSize={cubeSize} id={id} />
       <AnimatedBox
-        args={[innerCubeSize, innerCubeSize, innerCubeSize]}
-        // @FIXME: fix this type casting
-        rotation={
-          innerCubeSpring.rotation as unknown as [
-            x: number,
-            y: number,
-            z: number
-          ]
-        }
-        scale={springScale.scale}
-      >
-        <meshBasicMaterial>
-          <GradientTexture stops={[0, 1]} colors={innerBlockColor} />
-        </meshBasicMaterial>
-        <Edges color={colors.white} scale={1} />
-      </AnimatedBox>
-      <AnimatedBox
         args={[cubeSize, cubeSize, cubeSize]}
+        geometry={boxGeometry}
         // @FIXME: fix this type casting
         rotation={
           outerCubeSpring.rotation as unknown as [
@@ -226,6 +198,7 @@ const BlockRenderCore: FC<{
           distortionScale={1}
           temporalDistortion={0.5}
           clearcoat={1}
+          transmissionSampler
         />
         <AnimatedEdges color={colors.white} scale={edgesSpring.scale} />
       </AnimatedBox>
