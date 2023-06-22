@@ -126,7 +126,7 @@ export function reducer(state: UiState, action: BlockAction): UiState {
 // The Blockchain interface describes the data structure that we will use to render the blocks.
 // Each block can have a number of children blocks, and each block has it's own state.
 export const initialStacksChain: Blockchain<Chain.STX> = {
-  name: "stacks",
+  name: Chain.STX,
   actions: [],
   blocks: {
     1: {
@@ -138,7 +138,7 @@ export const initialStacksChain: Blockchain<Chain.STX> = {
 };
 
 export const initialBitcoinChain: Blockchain<Chain.BTC> = {
-  name: "bitcoin",
+  name: Chain.BTC,
   actions: [],
   blocks: {
     1: {

@@ -24,8 +24,7 @@ export const BlockPopup: FC<BlockPopupProps> = ({
 }) => {
   const { dispatch } = useContext(UiStateContext);
   const revealSprings = useSpring({
-    maxWidth: isHovering ? 230 : 0,
-    maxHeight: isHovering ? 136 : 0,
+    opacity: isHovering ? 1 : 0,
   });
   return (
     <Html>
@@ -33,7 +32,10 @@ export const BlockPopup: FC<BlockPopupProps> = ({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className="BlockPopup"
-        style={{ ...revealSprings }}
+        style={{
+          ...revealSprings,
+          visibility: isHovering ? "visible" : "hidden",
+        }}
       >
         <ul
           className="BlockPopupList"

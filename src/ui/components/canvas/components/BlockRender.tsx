@@ -1,13 +1,16 @@
-import { useSpring, animated, config } from "@react-spring/three";
+import { animated, config, useSpring } from "@react-spring/three";
 import {
-  GradientTexture,
-  Edges,
-  MeshTransmissionMaterial,
-  Line,
   Box,
+  Edges,
+  GradientTexture,
+  Line,
+  MeshTransmissionMaterial,
 } from "@react-three/drei";
+import { ThreeEvent } from "@react-three/fiber";
 import React, { FC, useCallback, useContext, useEffect, useState } from "react";
+import { UiStateContext } from "../../../../UiState";
 import { Block, BlockPosition, Chain } from "../../../../domain/Block";
+import { BlockActionType } from "../../../../domain/BlockAction";
 import { BlockConnection } from "../../../../domain/BlockConnection";
 import { Blockchain } from "../../../../domain/Blockchain";
 import {
@@ -110,13 +113,28 @@ const AnimatedGroup = animated.group;
 const AnimatedBox = animated(Box);
 const AnimatedEdges = animated(Edges);
 
-const Component: FC<{
+const BlockRenderCore: FC<{
   id: string;
   block: Block;
   chain: Blockchain<Chain.STX | Chain.BTC>;
 }> = ({ block, id, chain }) => {
   const { height, width } = useContext(DimensionsContext);
+  const { dispatch } = useContext(UiStateContext);
   const [isHovering, setIsHovering] = useState(false);
+
+  const handleBlockClick = useCallback(
+    (event: ThreeEvent<MouseEvent>) => {
+      event.stopPropagation();
+      // eslint-disable-next-line no-console
+      console.log("Click on block?");
+      dispatch({
+        type: BlockActionType.MINE,
+        targetBlockId: id,
+        chain: chain.name,
+      });
+    },
+    [dispatch]
+  );
   useEffect(() => {
     document.body.style.cursor = isHovering ? "pointer" : "auto";
   }, [isHovering]);
@@ -163,7 +181,10 @@ const Component: FC<{
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
   const connections = getConnections(block, chain);
   return (
-    <AnimatedGroup position={[anchorX, anchorY, anchorZ]}>
+    <AnimatedGroup
+      position={[anchorX, anchorY, anchorZ]}
+      onClick={handleBlockClick}
+    >
       <BlockLabel isHovering={isHovering} cubeSize={cubeSize} id={id} />
       <AnimatedBox
         args={[innerCubeSize, innerCubeSize, innerCubeSize]}
@@ -223,7 +244,7 @@ const Component: FC<{
   );
 };
 
-export const BlockRender = React.memo(Component, (prev, next) => {
+export const BlockRender = React.memo(BlockRenderCore, (prev, next) => {
   // We only re-render this component if the type of block being rendered has changed
   if (
     prev.block.type === Chain.STX &&

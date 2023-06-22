@@ -6,7 +6,6 @@ import { Blockchain } from "../../../domain/Blockchain";
 import { DimensionsContext, blockSpace } from "../../../domain/Dimensions";
 import { BlockRender } from "./components/BlockRender";
 
-// @TODO: Fix scroll jittering
 export const BlockchainRender: FC<{
   chain: Blockchain<Chain.STX | Chain.BTC>;
   translateY?: number;
@@ -37,6 +36,8 @@ export const BlockchainRender: FC<{
       : translateY >= maxHeight
       ? maxHeight
       : translateY;
+  // eslint-disable-next-line no-console
+  console.log("y changed:", y);
   const { position } = useSpring({
     position: [0, y, 0],
     config: { mass: 0, tension: 0, friction: 1, precision: 0.0001 },
