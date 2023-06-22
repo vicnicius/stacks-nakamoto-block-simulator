@@ -1,6 +1,5 @@
 import { animated, config, useSpring } from "@react-spring/three";
 import { Box, Edges, Line, MeshTransmissionMaterial } from "@react-three/drei";
-import { ThreeEvent } from "@react-three/fiber";
 import React, { FC, useCallback, useContext, useEffect, useState } from "react";
 import { BoxGeometry } from "three";
 import { UiStateContext } from "../../../../UiState";
@@ -118,19 +117,15 @@ const BlockRenderCore: FC<{
   const { dispatch } = useContext(UiStateContext);
   const [isHovering, setIsHovering] = useState(false);
 
-  const handleBlockClick = useCallback(
-    (event: ThreeEvent<MouseEvent>) => {
-      event.stopPropagation();
-      // eslint-disable-next-line no-console
-      console.log("Click on block?");
-      dispatch({
-        type: BlockActionType.MINE,
-        targetBlockId: id,
-        chain: chain.name,
-      });
-    },
-    [dispatch]
-  );
+  const handleBlockClick = useCallback(() => {
+    // eslint-disable-next-line no-console
+    console.log("Click on block?");
+    dispatch({
+      type: BlockActionType.MINE,
+      targetBlockId: id,
+      chain: chain.name,
+    });
+  }, [dispatch]);
   useEffect(() => {
     document.body.style.cursor = isHovering ? "pointer" : "auto";
   }, [isHovering]);
