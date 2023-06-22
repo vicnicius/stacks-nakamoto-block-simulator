@@ -45,7 +45,7 @@ const handleScroll = throttle(
       setRightTranslateY(newRightTranslateY);
     }
   },
-  500,
+  150,
   { leading: true }
 );
 

@@ -37,10 +37,9 @@ export const BlockchainRender: FC<{
       ? maxHeight
       : translateY;
   // eslint-disable-next-line no-console
-  console.log("y changed:", y);
   const { position } = useSpring({
     position: [0, y, 0],
-    config: { mass: 0, tension: 0, friction: 1, precision: 0.0001 },
+    config: { mass: 0.15, tension: 5, friction: 5, precision: 0.0001 },
   });
   const { blocks } = chain;
   return (
