@@ -1,6 +1,13 @@
 import { animated, config, useSpring } from "@react-spring/three";
 import { Box, Edges, Line, MeshTransmissionMaterial } from "@react-three/drei";
-import React, { FC, useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { BoxGeometry } from "three";
 import { UiStateContext } from "../../../../UiState";
 import { Block, BlockPosition, Chain } from "../../../../domain/Block";
@@ -48,38 +55,71 @@ const getAnchorsFromPosition: (
 const Connections: FC<{ connections: BlockConnection[] }> = ({
   connections,
 }) => {
+  const deltaY = cubeSize * Math.SQRT2;
   const points: [number, number, number][] = [];
-  const topConnectionSize =
-    connections.includes(BlockConnection.LEFT) ||
-    connections.includes(BlockConnection.RIGHT)
-      ? cubeSize * Math.SQRT2
-      : cubeSize * Math.SQRT2 * 2;
+  connections.forEach((connection: BlockConnection, index: number) => {
+    const deltaX = cubeHorizontalDistance * Math.SQRT2;
+    // If it's right behind the parent, we just draw a straight line
+    if (connection === BlockConnection.TOP && connections.length === 2) {
+      return points.push([0, 0, 0], [0, deltaY * 2, 0]);
+    }
+    if (connection === BlockConnection.TOP && index === 0) {
+      return points.push([0, 0, 0], [0, deltaY, 0]);
+    }
 
-  if (connections.includes(BlockConnection.BOTTOM)) {
-    points.push([0, 0, 0], [0, topConnectionSize, 0]);
-  }
+    // Final connection
+    if (
+      connection === BlockConnection.TOP &&
+      index === connections.length - 1
+    ) {
+      const initial: [number, number, number] =
+        connections[index - 1] === BlockConnection.LEFT
+          ? [
+              (-deltaX * (index - 1)) / 2,
+              cubeSize * Math.SQRT2,
+              (deltaX * (index - 1)) / 2,
+            ]
+          : [
+              (deltaX * (index - 1)) / 2,
+              cubeSize * Math.SQRT2,
+              (-deltaX * (index - 1)) / 2,
+            ];
+      const final: [number, number, number] =
+        connections[index - 1] === BlockConnection.LEFT
+          ? [
+              (-deltaX * (index - 1)) / 2,
+              cubeSize * Math.SQRT2 * 2,
+              (deltaX * (index - 1)) / 2,
+            ]
+          : [
+              (deltaX * (index - 1)) / 2,
+              cubeSize * Math.SQRT2 * 2,
+              (-deltaX * (index - 1)) / 2,
+            ];
+      return points.push(initial, final);
+    }
+    if (connection === BlockConnection.LEFT) {
+      return points.push(
+        [
+          (-deltaX * (index - 1)) / 2,
+          cubeSize * Math.SQRT2,
+          (deltaX * (index - 1)) / 2,
+        ],
+        [(-deltaX * index) / 2, cubeSize * Math.SQRT2, (deltaX * index) / 2]
+      );
+    }
+    if (connections.includes(BlockConnection.RIGHT)) {
+      return points.push(
+        [
+          (deltaX * (index - 1)) / 2,
+          cubeSize * Math.SQRT2,
+          (-deltaX * (index - 1)) / 2,
+        ],
+        [(deltaX * index) / 2, cubeSize * Math.SQRT2, (-deltaX * index) / 2]
+      );
+    }
+  });
 
-  if (connections.includes(BlockConnection.LEFT)) {
-    points.push(
-      [0, cubeSize * Math.SQRT2, 0],
-      [
-        (-cubeHorizontalDistance * Math.SQRT2) / 2,
-        cubeSize * Math.SQRT2,
-        (cubeHorizontalDistance * Math.SQRT2) / 2,
-      ]
-    );
-  }
-
-  if (connections.includes(BlockConnection.RIGHT)) {
-    points.push(
-      [0, cubeSize * Math.SQRT2, 0],
-      [
-        (cubeHorizontalDistance * Math.SQRT2) / 2,
-        cubeSize * Math.SQRT2,
-        -(cubeHorizontalDistance * Math.SQRT2) / 2,
-      ]
-    );
-  }
   return <Line points={points} segments color={colors.gray} />;
 };
 
@@ -91,16 +131,27 @@ const getConnections: (
   if (parent === undefined) {
     return [];
   }
-  if (parent.position.horizontal === block.position.horizontal) {
-    return [BlockConnection.BOTTOM];
-  }
+  const connections = [BlockConnection.TOP];
   if (parent.position.horizontal < block.position.horizontal) {
-    return [BlockConnection.BOTTOM, BlockConnection.LEFT];
+    for (
+      let i = block.position.horizontal;
+      i > parent.position.horizontal;
+      i = i - 1
+    ) {
+      connections.push(BlockConnection.LEFT);
+    }
   }
   if (parent.position.horizontal > block.position.horizontal) {
-    return [BlockConnection.BOTTOM, BlockConnection.RIGHT];
+    for (
+      let i = block.position.horizontal;
+      i < parent.position.horizontal;
+      i = i + 1
+    ) {
+      connections.push(BlockConnection.RIGHT);
+    }
   }
-  return [];
+  connections.push(BlockConnection.TOP);
+  return connections;
 };
 
 const AnimatedGroup = animated.group;
@@ -118,8 +169,6 @@ const BlockRenderCore: FC<{
   const [isHovering, setIsHovering] = useState(false);
 
   const handleBlockClick = useCallback(() => {
-    // eslint-disable-next-line no-console
-    console.log("Click on block?");
     dispatch({
       type: BlockActionType.MINE,
       targetBlockId: id,
@@ -162,7 +211,10 @@ const BlockRenderCore: FC<{
   );
   const outerBlockColor =
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
-  const connections = getConnections(block, chain);
+  const connections = useMemo(
+    () => getConnections(block, chain),
+    [block, chain]
+  );
   return (
     <AnimatedGroup
       position={[anchorX, anchorY, anchorZ]}
@@ -197,7 +249,7 @@ const BlockRenderCore: FC<{
         />
         <AnimatedEdges color={colors.white} scale={edgesSpring.scale} />
       </AnimatedBox>
-      <group position={[(cubeSize - 8) / 2, cubeSize, -(cubeSize - 8) / 2]}>
+      <group position={[18, 0, -18]}>
         <BlockPopup
           isHovering={isHovering}
           handleMouseEnter={handlePopupMouseEnter}

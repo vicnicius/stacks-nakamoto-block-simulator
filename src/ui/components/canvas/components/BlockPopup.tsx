@@ -24,7 +24,8 @@ export const BlockPopup: FC<BlockPopupProps> = ({
 }) => {
   const { dispatch } = useContext(UiStateContext);
   const revealSprings = useSpring({
-    maxWidth: isHovering ? 244 : 0,
+    maxWidth: isHovering ? 260 : 0,
+    borderWidth: isHovering ? 1 : 0,
   });
   return (
     <Html>

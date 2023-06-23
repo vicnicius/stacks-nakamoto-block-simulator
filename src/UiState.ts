@@ -35,6 +35,7 @@ function getNewPosition(
   let availableHorizontalPosition;
   for (let i = 0; i <= 5; i = i + 1) {
     const tryHorizontalPosition = horizontalPosition + i;
+    const tryHorizontalPositionNegative = horizontalPosition - i;
     if (
       filledPositions[verticalPosition]?.[tryHorizontalPosition] === undefined
     ) {
@@ -42,9 +43,10 @@ function getNewPosition(
       break;
     }
     if (
-      filledPositions[verticalPosition]?.[-tryHorizontalPosition] === undefined
+      filledPositions[verticalPosition]?.[tryHorizontalPositionNegative] ===
+      undefined
     ) {
-      availableHorizontalPosition = -tryHorizontalPosition;
+      availableHorizontalPosition = tryHorizontalPositionNegative;
       break;
     }
   }
@@ -105,7 +107,6 @@ function mineBlock(
 }
 
 export function reducer(state: UiState, action: BlockAction): UiState {
-  // eslint-disable-next-line no-console
   const { chain, type, targetBlockId } = action;
   if (type === BlockActionType.MINE && chain === Chain.STX) {
     const nextId = state.lastId + 1;

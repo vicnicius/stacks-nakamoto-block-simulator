@@ -1,21 +1,22 @@
 .BlockPopup {
+  box-sizing: border-box;
   color: white;
-  padding: 8px;
-  margin: 0 8px;
-  padding: 0 8px;
+  margin: 0;
+  padding: 0;
   position: relative;
   overflow: hidden;
-  /* width: 224px; */
+  width: 224px;
+  border-radius: 8px;
+  border-style: solid;
+  border-color: #404040;
+  border-width: 0;
 }
 .BlockPopupList {
-  border: 1px solid #404040;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #000000;
-  padding: 0;
-  list-style: none;
-  width: 222px;
   height: 100%;
+  list-style: none;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
 }
 
 .BlockPopupListItem {
