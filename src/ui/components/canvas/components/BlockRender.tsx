@@ -52,9 +52,10 @@ const getAnchorsFromPosition: (
   return getIsometricCoordinates(cubeX, cubeY);
 };
 
-const Connections: FC<{ connections: BlockConnection[] }> = ({
-  connections,
-}) => {
+const Connections: FC<{
+  connections: BlockConnection[];
+  isHighlighted: boolean;
+}> = ({ connections, isHighlighted }) => {
   const deltaY = cubeSize * Math.SQRT2;
   const points: [number, number, number][] = [];
   connections.forEach((connection: BlockConnection, index: number) => {
@@ -119,8 +120,9 @@ const Connections: FC<{ connections: BlockConnection[] }> = ({
       );
     }
   });
-
-  return <Line points={points} segments color={colors.gray} />;
+  const lineWidth = isHighlighted ? 1.5 : 0.25;
+  const color = isHighlighted ? colors.white : colors.gray;
+  return <Line points={points} segments color={color} lineWidth={lineWidth} />;
 };
 
 const getConnections: (
@@ -159,7 +161,7 @@ const AnimatedBox = animated(Box);
 const AnimatedEdges = animated(Edges);
 const boxGeometry = new BoxGeometry(cubeSize, cubeSize, cubeSize);
 
-const BlockRenderCore: FC<{
+export const BlockRender: FC<{
   id: string;
   block: Block;
   chain: Blockchain<Chain.STX | Chain.BTC>;
@@ -178,17 +180,26 @@ const BlockRenderCore: FC<{
   useEffect(() => {
     document.body.style.cursor = isHovering ? "pointer" : "auto";
   }, [isHovering]);
+  const setHover = (hover: boolean) => {
+    dispatch({
+      type: BlockActionType.HOVER,
+      targetBlockId: id,
+      chain: chain.name,
+      value: hover,
+    });
+    setIsHovering(hover);
+  };
   const handleCubeMouseEnter = useCallback(() => {
-    setIsHovering(true);
+    setHover(true);
   }, []);
   const handleCubeMouseLeave = useCallback(() => {
-    setIsHovering(false);
+    setHover(false);
   }, []);
   const handlePopupMouseEnter = useCallback(() => {
-    setIsHovering(true);
+    setHover(true);
   }, []);
   const handlePopupMouseLeave = useCallback(() => {
-    setIsHovering(false);
+    setHover(false);
   }, []);
   const springScale = useSpring({
     from: { scale: 0 },
@@ -201,7 +212,7 @@ const BlockRenderCore: FC<{
       : ([0, 0, 0] as [number, number, number]),
   });
   const edgesSpring = useSpring({
-    scale: isHovering ? 1.25 : 1,
+    scale: isHovering || block.isHighlighted ? 1.25 : 1,
   });
   const [anchorX, anchorY, anchorZ] = getAnchorsFromPosition(
     block.position,
@@ -259,19 +270,10 @@ const BlockRenderCore: FC<{
           chain={block.type}
         />
       </group>
-      <Connections connections={connections} />
+      <Connections
+        isHighlighted={block.isHighlighted}
+        connections={connections}
+      />
     </AnimatedGroup>
   );
 };
-
-export const BlockRender = React.memo(BlockRenderCore, (prev, next) => {
-  // We only re-render this component if the type of block being rendered has changed
-  if (
-    prev.block.type === Chain.STX &&
-    next.block.type === Chain.STX &&
-    prev.block.state !== next.block.state
-  ) {
-    return false;
-  }
-  return true;
-});

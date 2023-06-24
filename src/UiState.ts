@@ -1,6 +1,10 @@
 import React, { Dispatch } from "react";
 import { BlockPosition, Chain, StacksBlockState } from "./domain/Block";
-import { BlockAction, BlockActionType } from "./domain/BlockAction";
+import {
+  BlockAction,
+  BlockActionType,
+  isHoverAction,
+} from "./domain/BlockAction";
 import { Blockchain } from "./domain/Blockchain";
 
 export interface UiState {
@@ -74,7 +78,7 @@ function mineBlock(
     };
     const newBitcoinBlockAttributes = {
       type: Chain.BTC,
-      parentId: targetBlockId,
+      parentId: newBlockId - 1,
       position: getNewPosition(
         // When mining stacks we don't want to fork the bitcoin side, so the target is always the tip of the chain
         String(newBlockId - 1),
@@ -106,6 +110,31 @@ function mineBlock(
   return { stacks: state.stacks, bitcoin: state.bitcoin };
 }
 
+function highlighBlock<T extends Chain>(
+  blockId: string,
+  blockchain: Blockchain<T>,
+  highlight: boolean
+): Blockchain<T> {
+  if (!blockchain.blocks[blockId]) {
+    throw new Error("Trying to hover inexistent block!");
+  }
+  const updatedChain = {
+    ...blockchain,
+    blocks: {
+      ...blockchain.blocks,
+      [blockId]: { ...blockchain.blocks[blockId], isHighlighted: highlight },
+    },
+  };
+  return blockchain.blocks[blockId].parentId === undefined
+    ? updatedChain
+    : highlighBlock(
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        blockchain.blocks[blockId].parentId!,
+        updatedChain,
+        highlight
+      );
+}
+
 export function reducer(state: UiState, action: BlockAction): UiState {
   const { chain, type, targetBlockId } = action;
   if (type === BlockActionType.MINE && chain === Chain.STX) {
@@ -116,6 +145,30 @@ export function reducer(state: UiState, action: BlockAction): UiState {
       bitcoin,
       actions: [...state.actions, action],
       lastId: nextId,
+    };
+  }
+
+  if (isHoverAction(action) && chain === Chain.STX) {
+    const stacks = highlighBlock(
+      targetBlockId,
+      state.stacks,
+      action.value as boolean
+    );
+    return {
+      ...state,
+      stacks,
+    };
+  }
+
+  if (isHoverAction(action) && chain === Chain.BTC) {
+    const bitcoin = highlighBlock(
+      targetBlockId,
+      state.bitcoin,
+      action.value as boolean
+    );
+    return {
+      ...state,
+      bitcoin,
     };
   }
 
@@ -132,6 +185,7 @@ export const initialStacksChain: Blockchain<Chain.STX> = {
   blocks: {
     1: {
       position: { vertical: 0, horizontal: 0 },
+      isHighlighted: false,
       type: Chain.STX,
       state: StacksBlockState.NEW,
     },
@@ -144,6 +198,7 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
   blocks: {
     1: {
       position: { vertical: 0, horizontal: 0 },
+      isHighlighted: false,
       type: Chain.BTC,
     },
   },

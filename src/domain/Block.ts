@@ -14,6 +14,7 @@ export type BlockPosition = { vertical: number; horizontal: number };
 
 interface CommonBlock<T extends Chain> {
   type: T;
+  isHighlighted: boolean;
   position: BlockPosition;
   parentId?: string;
 }
