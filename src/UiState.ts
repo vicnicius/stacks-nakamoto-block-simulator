@@ -1,5 +1,11 @@
 import React, { Dispatch } from "react";
-import { BlockPosition, Chain, StacksBlockState } from "./domain/Block";
+import {
+  BitcoinBlock,
+  BlockPosition,
+  Chain,
+  StacksBlock,
+  StacksBlockState,
+} from "./domain/Block";
 import {
   BlockAction,
   BlockActionType,
@@ -70,33 +76,56 @@ function mineBlock(
   state: UiState
 ): { bitcoin: Blockchain<Chain.BTC>; stacks: Blockchain<Chain.STX> } {
   if (targetChain === Chain.STX) {
-    const newStacksBlockAttributes = {
+    const newStacksBlockAttributes: StacksBlock = {
       type: targetChain,
+      childrenIds: [],
+      isHighlighted: false,
       parentId: targetBlockId,
       position: getNewPosition(targetBlockId, state[targetChain].blocks),
       state: StacksBlockState.NEW,
     };
-    const newBitcoinBlockAttributes = {
+    const updatedStacksParentBlock: StacksBlock = {
+      ...state[targetChain].blocks[targetBlockId],
+      childrenIds: [
+        ...state[targetChain].blocks[targetBlockId].childrenIds,
+        String(newBlockId),
+      ],
+    };
+
+    // When mining stacks we don't want to fork the bitcoin side, so the target is always the tip of the chain
+    const bitcoinParentId = String(newBlockId - 1);
+    const newBitcoinBlockAttributes: BitcoinBlock = {
       type: Chain.BTC,
-      parentId: newBlockId - 1,
+      childrenIds: [],
+      isHighlighted: false,
+      parentId: bitcoinParentId,
       position: getNewPosition(
-        // When mining stacks we don't want to fork the bitcoin side, so the target is always the tip of the chain
-        String(newBlockId - 1),
+        String(bitcoinParentId),
         state[Chain.BTC].blocks
       ),
     };
+    const updatedBitcoinParentBlock: BitcoinBlock = {
+      ...state[Chain.BTC].blocks[bitcoinParentId],
+      childrenIds: [
+        ...state[Chain.BTC].blocks[bitcoinParentId].childrenIds,
+        String(newBlockId),
+      ],
+    };
+
     return {
       bitcoin: {
         ...state.bitcoin,
         blocks: {
           ...state.bitcoin.blocks,
           [newBlockId]: newBitcoinBlockAttributes,
+          [bitcoinParentId]: updatedBitcoinParentBlock,
         },
       },
       stacks: {
         ...state.stacks,
         blocks: {
           ...state.stacks.blocks,
+          [targetBlockId]: updatedStacksParentBlock,
           [newBlockId]: newStacksBlockAttributes,
         },
       },
@@ -185,6 +214,7 @@ export const initialStacksChain: Blockchain<Chain.STX> = {
   blocks: {
     1: {
       position: { vertical: 0, horizontal: 0 },
+      childrenIds: [],
       isHighlighted: false,
       type: Chain.STX,
       state: StacksBlockState.NEW,
@@ -200,6 +230,7 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
       position: { vertical: 0, horizontal: 0 },
       isHighlighted: false,
       type: Chain.BTC,
+      childrenIds: [],
     },
   },
 };

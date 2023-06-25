@@ -7,9 +7,10 @@ import { Chain } from "../../../../domain/Block";
 import { BlockActionType } from "../../../../domain/BlockAction";
 
 interface BlockPopupProps {
+  hasChildren: boolean;
   handleMouseEnter: () => void;
   handleMouseLeave: () => void;
-  isHovering: boolean;
+  visible: boolean;
   position: [x: number, y: number, z: number];
   blockId: string;
   chain: Chain;
@@ -18,14 +19,15 @@ interface BlockPopupProps {
 export const BlockPopup: FC<BlockPopupProps> = ({
   blockId,
   chain,
+  hasChildren,
   handleMouseEnter,
   handleMouseLeave,
-  isHovering,
+  visible,
 }) => {
   const { dispatch } = useContext(UiStateContext);
   const revealSprings = useSpring({
-    maxWidth: isHovering ? 260 : 0,
-    borderWidth: isHovering ? 1 : 0,
+    maxWidth: visible ? 260 : 0,
+    borderWidth: visible ? 1 : 0,
   });
   return (
     <Html>
@@ -47,7 +49,9 @@ export const BlockPopup: FC<BlockPopupProps> = ({
             })
           }
         >
-          <li className="BlockPopupListItem">Mine</li>
+          <li className="BlockPopupListItem">
+            {hasChildren ? "Fork" : "Mine"}
+          </li>
         </ul>
       </animated.div>
     </Html>

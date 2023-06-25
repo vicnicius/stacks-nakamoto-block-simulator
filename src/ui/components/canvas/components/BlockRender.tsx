@@ -220,6 +220,7 @@ export const BlockRender: FC<{
     height,
     block.type
   );
+  const hasChildren = block.childrenIds.length > 0;
   const outerBlockColor =
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
   const connections = useMemo(
@@ -262,12 +263,13 @@ export const BlockRender: FC<{
       </AnimatedBox>
       <group position={[18, 0, -18]}>
         <BlockPopup
-          isHovering={isHovering}
+          blockId={id}
+          chain={block.type}
+          hasChildren={block.childrenIds.length > 0}
           handleMouseEnter={handlePopupMouseEnter}
           handleMouseLeave={handlePopupMouseLeave}
           position={[anchorX, anchorY, anchorZ]}
-          blockId={id}
-          chain={block.type}
+          visible={isHovering && hasChildren}
         />
       </group>
       <Connections

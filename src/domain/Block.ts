@@ -17,12 +17,13 @@ interface CommonBlock<T extends Chain> {
   isHighlighted: boolean;
   position: BlockPosition;
   parentId?: string;
+  childrenIds: string[];
 }
 
 export enum StacksBlockState {
   NEW,
   FROZEN,
-  BLESSED,
+  FINALIZED,
 }
 
 export interface StacksBlock extends CommonBlock<Chain.STX> {
