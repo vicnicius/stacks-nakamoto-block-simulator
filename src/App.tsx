@@ -84,6 +84,7 @@ export const App: FC = () => {
   const [state, dispatch] = useReducer(reducer, {
     bitcoin: initialBitcoinChain,
     stacks: initialStacksChain,
+    longestChainStartId: "1",
     actions: [],
     lastId: 1,
   });

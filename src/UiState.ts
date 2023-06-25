@@ -18,6 +18,7 @@ export interface UiState {
   [Chain.STX]: Blockchain<Chain.STX>;
   actions: BlockAction[];
   lastId: number;
+  longestChainStartId: string;
 }
 
 function getNewPosition(
@@ -164,6 +165,34 @@ function highlighBlock<T extends Chain>(
       );
 }
 
+function getLengthFromId<T extends Chain>(
+  chain: Blockchain<T>,
+  startId: string
+): number {
+  let block = chain.blocks[startId];
+  let length = 1;
+  while (block.parentId !== undefined) {
+    block = chain.blocks[block.parentId];
+    length = length + 1;
+  }
+  return length;
+}
+
+function getLongestChainStartId<T extends Chain>(chain: Blockchain<T>): string {
+  const [longestBlockId] = Object.keys(chain.blocks)
+    .map((blockId) => [blockId, getLengthFromId(chain, blockId)])
+    .reduce(
+      (acc, [blockId, length]) => {
+        if (length > acc[1]) {
+          return [blockId, length];
+        }
+        return acc;
+      },
+      ["", 0]
+    );
+  return String(longestBlockId);
+}
+
 export function reducer(state: UiState, action: BlockAction): UiState {
   const { chain, type, targetBlockId } = action;
   if (
@@ -176,6 +205,7 @@ export function reducer(state: UiState, action: BlockAction): UiState {
       stacks,
       bitcoin,
       actions: [...state.actions, action],
+      longestChainStartId: getLongestChainStartId(stacks),
       lastId: nextId,
     };
   }
@@ -247,6 +277,7 @@ export const UiStateContext = React.createContext<{
     stacks: initialStacksChain,
     actions: [],
     lastId: 1,
+    longestChainStartId: "1",
   },
   dispatch: () => undefined,
 });
