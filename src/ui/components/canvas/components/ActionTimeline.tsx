@@ -3,16 +3,19 @@ import React, { FC, useContext } from "react";
 import { UiStateContext } from "../../../../UiState";
 import { BlockActionType } from "../../../../domain/BlockAction";
 import { DimensionsContext } from "../../../../domain/Dimensions";
-import { ReactComponent as MineIcon } from "../../icons/mine.svg";
 import "./ActionTimeline.css";
+import { Icon } from "../../icon/Icon";
 
-const Icon = ({
+const InlineIcon = ({
   type,
 }: {
   type: Omit<BlockActionType, BlockActionType.HOVER>;
 }) => {
   if (type === BlockActionType.MINE) {
-    return <MineIcon className="ActionTimelineIcon" />;
+    return <Icon name="mine" className="ActionTimelineIcon" />;
+  }
+  if (type === BlockActionType.FORK) {
+    return <Icon name="fork" className="ActionTimelineIcon" />;
   }
   return null;
 };
@@ -27,9 +30,9 @@ export const ActionTimeline: FC = () => {
     <Html position={[0, height / 2, 0]}>
       <ul className="ActionTimelineWrapper" style={{ maxHeight: height - 36 }}>
         {actions.map((action, index) => (
-          <li key={index} className="ActionTimeline" style={{ color: "white" }}>
-            <Icon type={action.type} />
-            {action.type}
+          <li key={index} className="ActionTimeline">
+            <InlineIcon type={action.type} />
+            {action.type} #{action.targetBlockId}
           </li>
         ))}
       </ul>

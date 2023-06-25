@@ -166,7 +166,10 @@ function highlighBlock<T extends Chain>(
 
 export function reducer(state: UiState, action: BlockAction): UiState {
   const { chain, type, targetBlockId } = action;
-  if (type === BlockActionType.MINE && chain === Chain.STX) {
+  if (
+    (type === BlockActionType.MINE || type === BlockActionType.FORK) &&
+    chain === Chain.STX
+  ) {
     const nextId = state.lastId + 1;
     const { bitcoin, stacks } = mineBlock(targetBlockId, nextId, chain, state);
     return {

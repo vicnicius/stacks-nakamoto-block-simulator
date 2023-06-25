@@ -3,6 +3,7 @@ import { Chain } from "./Block";
 export enum BlockActionType {
   // When mine targets a block, this means mine a new block having that one as parent.
   MINE = "mine",
+  FORK = "fork",
   FREEZE = "freeze",
   BLESS = "bless",
   HOVER = "hover",

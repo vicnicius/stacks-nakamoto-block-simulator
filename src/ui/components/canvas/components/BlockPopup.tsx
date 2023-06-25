@@ -43,7 +43,7 @@ export const BlockPopup: FC<BlockPopupProps> = ({
           className="BlockPopupList"
           onClick={() =>
             dispatch({
-              type: BlockActionType.MINE,
+              type: hasChildren ? BlockActionType.FORK : BlockActionType.MINE,
               targetBlockId: blockId,
               chain,
             })

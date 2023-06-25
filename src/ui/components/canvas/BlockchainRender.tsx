@@ -36,7 +36,6 @@ export const BlockchainRender: FC<{
       : translateY >= maxHeight
       ? maxHeight
       : translateY;
-  // eslint-disable-next-line no-console
   const { position } = useSpring({
     position: [0, y, 0],
     config: { mass: 0.15, tension: 5, friction: 5, precision: 0.0001 },

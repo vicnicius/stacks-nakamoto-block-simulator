@@ -169,14 +169,15 @@ export const BlockRender: FC<{
   const { height, width } = useContext(DimensionsContext);
   const { dispatch } = useContext(UiStateContext);
   const [isHovering, setIsHovering] = useState(false);
+  const hasChildren = block.childrenIds.length > 0;
 
   const handleBlockClick = useCallback(() => {
     dispatch({
-      type: BlockActionType.MINE,
+      type: hasChildren ? BlockActionType.FORK : BlockActionType.MINE,
       targetBlockId: id,
       chain: chain.name,
     });
-  }, [dispatch]);
+  }, [dispatch, hasChildren]);
   useEffect(() => {
     document.body.style.cursor = isHovering ? "pointer" : "auto";
   }, [isHovering]);
@@ -220,7 +221,6 @@ export const BlockRender: FC<{
     height,
     block.type
   );
-  const hasChildren = block.childrenIds.length > 0;
   const outerBlockColor =
     block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
   const connections = useMemo(
@@ -265,11 +265,11 @@ export const BlockRender: FC<{
         <BlockPopup
           blockId={id}
           chain={block.type}
-          hasChildren={block.childrenIds.length > 0}
+          hasChildren={hasChildren}
           handleMouseEnter={handlePopupMouseEnter}
           handleMouseLeave={handlePopupMouseLeave}
           position={[anchorX, anchorY, anchorZ]}
-          visible={isHovering && hasChildren}
+          visible={isHovering}
         />
       </group>
       <Connections
