@@ -196,11 +196,19 @@ function getLongestChainStartId<T extends Chain>(chain: Blockchain<T>): string {
   return String(longestBlockId);
 }
 
+function freezeChildren(chain: Blockchain<Chain.STX>, id: string) {
+  chain.blocks[id].state = StacksBlockState.FROZEN;
+  chain.blocks[id].childrenIds.forEach((childId) => {
+    freezeChildren(chain, childId);
+  });
+}
+
 function applyRules(
   chain: Blockchain<Chain.STX>,
   startId: string
 ): Blockchain<Chain.STX> {
   let depth = 1;
+  let previousId: undefined | string = undefined;
   let currentId = startId;
   let currentBlock = chain.blocks[startId];
   while (currentBlock.parentId !== undefined) {
@@ -210,12 +218,18 @@ function applyRules(
       currentBlock.state !== StacksBlockState.BLESSED
     ) {
       chain.blocks[currentId].state = StacksBlockState.FROZEN;
+      chain.blocks[currentId].childrenIds.forEach((childId) => {
+        if (previousId !== undefined && childId !== previousId) {
+          freezeChildren(chain, childId);
+        }
+      });
     }
 
     if (depth > FINALIZED_BLOCKS_DEPTH) {
       chain.blocks[currentId].state = StacksBlockState.FINALIZED;
     }
     depth = depth + 1;
+    previousId = currentId;
     currentId = currentBlock.parentId;
     currentBlock = chain.blocks[currentBlock.parentId];
   }
