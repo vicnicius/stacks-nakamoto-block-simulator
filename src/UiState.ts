@@ -252,7 +252,9 @@ export function reducer(state: UiState, action: BlockAction): UiState {
   // Mining Stacks blocks
   if (
     (type === BlockActionType.MINE || type === BlockActionType.FORK) &&
-    chain === Chain.STX
+    chain === Chain.STX &&
+    (state.stacks.blocks[targetBlockId].state === StacksBlockState.NEW ||
+      state.stacks.blocks[targetBlockId].state === StacksBlockState.BLESSED)
   ) {
     const nextId = state.lastId + 1;
     const { bitcoin, stacks: updatedStacksChain } = mineBlock(

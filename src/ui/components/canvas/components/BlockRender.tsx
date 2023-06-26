@@ -187,6 +187,22 @@ const getBlockColor = (block: Block): string => {
   return colors.darkYellow;
 };
 
+function getCursor(isHovering: boolean, block: Block): string {
+  if (
+    isHovering &&
+    block.type === Chain.STX &&
+    (block.state === StacksBlockState.NEW ||
+      block.state === StacksBlockState.BLESSED)
+  ) {
+    return "pointer";
+  }
+
+  if (isHovering && block.type === Chain.STX) {
+    return "not-allowed";
+  }
+  return "auto";
+}
+
 export const BlockRender: FC<{
   id: string;
   block: Block;
@@ -205,8 +221,8 @@ export const BlockRender: FC<{
     });
   }, [dispatch, hasChildren]);
   useEffect(() => {
-    document.body.style.cursor = isHovering ? "pointer" : "auto";
-  }, [isHovering]);
+    document.body.style.cursor = getCursor(isHovering, block);
+  }, [isHovering, block]);
   const setHover = (hover: boolean) => {
     dispatch({
       type: BlockActionType.HOVER,
@@ -252,6 +268,10 @@ export const BlockRender: FC<{
     () => getConnections(block, chain),
     [block, chain]
   );
+  const showPopup =
+    isHovering &&
+    block.type === Chain.STX &&
+    block.state === StacksBlockState.NEW;
   return (
     <AnimatedGroup
       position={[anchorX, anchorY, anchorZ]}
@@ -294,7 +314,7 @@ export const BlockRender: FC<{
           handleMouseEnter={handlePopupMouseEnter}
           handleMouseLeave={handlePopupMouseLeave}
           position={[anchorX, anchorY, anchorZ]}
-          visible={isHovering}
+          visible={showPopup}
         />
       </group>
       <Connections
