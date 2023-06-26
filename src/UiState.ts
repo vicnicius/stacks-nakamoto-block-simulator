@@ -202,7 +202,7 @@ function applyRules(
   let currentBlock = chain.blocks[startId];
   while (currentBlock.parentId !== undefined) {
     if (
-      depth > 5 &&
+      depth > 6 &&
       depth <= 100 &&
       currentBlock.state !== StacksBlockState.BLESSED
     ) {
@@ -212,7 +212,7 @@ function applyRules(
     currentId = currentBlock.parentId;
     currentBlock = chain.blocks[currentBlock.parentId];
   }
-  if (currentBlock.parentId === undefined && depth > 5) {
+  if (currentBlock.parentId === undefined && depth > 6) {
     chain.blocks[currentId].state = StacksBlockState.FROZEN;
   }
   return { ...chain };

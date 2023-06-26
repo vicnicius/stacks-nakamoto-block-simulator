@@ -10,7 +10,12 @@ import React, {
 } from "react";
 import { BoxGeometry } from "three";
 import { UiStateContext } from "../../../../UiState";
-import { Block, BlockPosition, Chain } from "../../../../domain/Block";
+import {
+  Block,
+  BlockPosition,
+  Chain,
+  StacksBlockState,
+} from "../../../../domain/Block";
 import { BlockActionType } from "../../../../domain/BlockAction";
 import { BlockConnection } from "../../../../domain/BlockConnection";
 import { Blockchain } from "../../../../domain/Blockchain";
@@ -159,7 +164,24 @@ const getConnections: (
 const AnimatedGroup = animated.group;
 const AnimatedBox = animated(Box);
 const AnimatedEdges = animated(Edges);
+// The unkown` casting is needeed to workaround the following issue:
+// https://github.com/pmndrs/react-spring/issues/1515
+// TS compiler: "Type instantiation is excessively deep and possibly infinite"
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const OuterBlockMaterial = animated(MeshTransmissionMaterial) as any;
 const boxGeometry = new BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+const getBlockColor = (block: Block): string => {
+  if (block.type === Chain.STX && block.state === StacksBlockState.NEW) {
+    return colors.darkPurple;
+  }
+
+  if (block.type === Chain.STX && block.state === StacksBlockState.FROZEN) {
+    return colors.lightBlue;
+  }
+
+  return colors.darkYellow;
+};
 
 export const BlockRender: FC<{
   id: string;
@@ -221,8 +243,7 @@ export const BlockRender: FC<{
     height,
     block.type
   );
-  const outerBlockColor =
-    block.type === Chain.STX ? colors.darkPurple : colors.darkYellow;
+  const outerBlockColor = useSpring({ color: getBlockColor(block) });
   const connections = useMemo(
     () => getConnections(block, chain),
     [block, chain]
@@ -248,8 +269,8 @@ export const BlockRender: FC<{
         onPointerOver={handleCubeMouseEnter}
         onPointerOut={handleCubeMouseLeave}
       >
-        <MeshTransmissionMaterial
-          color={outerBlockColor}
+        <OuterBlockMaterial
+          color={outerBlockColor.color}
           transmission={0.5}
           metalness={0}
           reflectivity={0.25}
