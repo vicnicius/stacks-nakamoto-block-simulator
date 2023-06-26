@@ -13,6 +13,9 @@ import {
 } from "./domain/BlockAction";
 import { Blockchain } from "./domain/Blockchain";
 
+const FINALIZED_BLOCKS_DEPTH = 100;
+const FROZEN_BLOCKS_DEPTH = 6;
+
 export interface UiState {
   [Chain.BTC]: Blockchain<Chain.BTC>;
   [Chain.STX]: Blockchain<Chain.STX>;
@@ -202,18 +205,29 @@ function applyRules(
   let currentBlock = chain.blocks[startId];
   while (currentBlock.parentId !== undefined) {
     if (
-      depth > 6 &&
-      depth <= 100 &&
+      depth > FROZEN_BLOCKS_DEPTH &&
+      depth <= FINALIZED_BLOCKS_DEPTH &&
       currentBlock.state !== StacksBlockState.BLESSED
     ) {
       chain.blocks[currentId].state = StacksBlockState.FROZEN;
+    }
+
+    if (depth > FINALIZED_BLOCKS_DEPTH) {
+      chain.blocks[currentId].state = StacksBlockState.FINALIZED;
     }
     depth = depth + 1;
     currentId = currentBlock.parentId;
     currentBlock = chain.blocks[currentBlock.parentId];
   }
-  if (currentBlock.parentId === undefined && depth > 6) {
+  if (
+    currentBlock.parentId === undefined &&
+    depth > FROZEN_BLOCKS_DEPTH &&
+    depth <= FINALIZED_BLOCKS_DEPTH
+  ) {
     chain.blocks[currentId].state = StacksBlockState.FROZEN;
+  }
+  if (currentBlock.parentId === undefined && depth > FINALIZED_BLOCKS_DEPTH) {
+    chain.blocks[currentId].state = StacksBlockState.FINALIZED;
   }
   return { ...chain };
 }

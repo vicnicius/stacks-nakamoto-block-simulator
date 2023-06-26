@@ -10,7 +10,8 @@ export const colors = {
   darkYellow: "#E87F05",
   lightYellow: "#FFC540",
   lightGray: "#DDDDDD",
-  lightBlue: "#40EEEE",
+  silver: "#E3FDFF",
+  lightBlue: "#0088FA",
   darkPurple: "#4234E9",
   lightPurple: "#DCD9FA",
 };

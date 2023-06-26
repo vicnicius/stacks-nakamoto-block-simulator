@@ -180,6 +180,10 @@ const getBlockColor = (block: Block): string => {
     return colors.lightBlue;
   }
 
+  if (block.type === Chain.STX && block.state === StacksBlockState.FINALIZED) {
+    return colors.silver;
+  }
+
   return colors.darkYellow;
 };
 
@@ -271,9 +275,9 @@ export const BlockRender: FC<{
       >
         <OuterBlockMaterial
           color={outerBlockColor.color}
-          transmission={0.5}
-          metalness={0}
-          reflectivity={0.25}
+          transmission={0.25}
+          metalness={0.1}
+          reflectivity={0.35}
           roughness={0.15}
           distortionScale={1}
           temporalDistortion={0.5}
