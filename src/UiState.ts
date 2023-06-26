@@ -193,14 +193,49 @@ function getLongestChainStartId<T extends Chain>(chain: Blockchain<T>): string {
   return String(longestBlockId);
 }
 
+function applyRules(
+  chain: Blockchain<Chain.STX>,
+  startId: string
+): Blockchain<Chain.STX> {
+  let depth = 1;
+  let currentId = startId;
+  let currentBlock = chain.blocks[startId];
+  while (currentBlock.parentId !== undefined) {
+    if (
+      depth > 5 &&
+      depth <= 100 &&
+      currentBlock.state !== StacksBlockState.BLESSED
+    ) {
+      chain.blocks[currentId].state = StacksBlockState.FROZEN;
+    }
+    depth = depth + 1;
+    currentId = currentBlock.parentId;
+    currentBlock = chain.blocks[currentBlock.parentId];
+  }
+  if (currentBlock.parentId === undefined && depth > 5) {
+    chain.blocks[currentId].state = StacksBlockState.FROZEN;
+  }
+  return { ...chain };
+}
+
 export function reducer(state: UiState, action: BlockAction): UiState {
   const { chain, type, targetBlockId } = action;
+
+  // Mining Stacks blocks
   if (
     (type === BlockActionType.MINE || type === BlockActionType.FORK) &&
     chain === Chain.STX
   ) {
     const nextId = state.lastId + 1;
-    const { bitcoin, stacks } = mineBlock(targetBlockId, nextId, chain, state);
+    const { bitcoin, stacks: updatedStacksChain } = mineBlock(
+      targetBlockId,
+      nextId,
+      chain,
+      state
+    );
+    const longestChainStartId = getLongestChainStartId(updatedStacksChain);
+    const stacks = applyRules(updatedStacksChain, longestChainStartId);
+
     return {
       stacks,
       bitcoin,

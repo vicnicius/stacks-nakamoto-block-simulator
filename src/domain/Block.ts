@@ -21,9 +21,10 @@ interface CommonBlock<T extends Chain> {
 }
 
 export enum StacksBlockState {
-  NEW,
-  FROZEN,
-  FINALIZED,
+  BLESSED = "blessed",
+  NEW = "new",
+  FROZEN = "frozen",
+  FINALIZED = "finalized",
 }
 
 export interface StacksBlock extends CommonBlock<Chain.STX> {
