@@ -2,6 +2,10 @@
 
 A Stacks block simulator and visualization tool, with educational purposes
 
+## :warning: :warning: This repository is under heavy development :warning: :warning:
+
+Consider every line of code experimental.
+
 ## Introduction
 
 The Stacks blockchain is about to undergo a series of transformative changes that will take its integration into the Bitcoin chain one step further. Those changes, collectively known as the Stacks Nakamoto Release, together with sBTC, will bring Stacks' smart contracts the ability to write to the Bitcoin blockchain, combined with the already present capacity to read from it.
@@ -11,10 +15,6 @@ The Stacks Nakamoto release proposes changes to Stacks' consensus algorithm, sig
 ## Disclaimer
 
 This project is part of the Stacks Foundation grant program. Documentation and other relevant information can be found on this page: [Stacks Nakamoto Block Simulator Gitbook](https://vini-btc.gitbook.io/stacks-nakamoto-ui-simulator/). The source code for this documentation also live on this repository, in the `/docs` folder.
-
-## :warning: :warning: This repository is under heavy development :warning: :warning:
-
-There's not a lot of structure since most of the code is still in an experimentation phase.
 
 ---
 
