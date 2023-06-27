@@ -9,7 +9,6 @@
   border-radius: 8px;
   border-style: solid;
   border-color: #404040;
-  border-width: 0;
 }
 .BlockPopupList {
   height: 100%;
@@ -18,13 +17,11 @@
   overflow: hidden;
   padding: 0;
 }
-
 .BlockPopupListItem {
   background-color: #000000;
   padding: 8px 12px;
   transition: all 0.2s ease-in-out;
 }
-
 .BlockPopupListItem:hover {
-  background-color: #121212;
+  background-color: #222222;
 }

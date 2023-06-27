@@ -252,13 +252,20 @@ export function reducer(state: UiState, action: BlockAction): UiState {
   // Mining Stacks blocks
   if (
     (type === BlockActionType.MINE || type === BlockActionType.FORK) &&
-    chain === Chain.STX &&
-    (state.stacks.blocks[targetBlockId].state === StacksBlockState.NEW ||
-      state.stacks.blocks[targetBlockId].state === StacksBlockState.BLESSED)
+    chain === Chain.STX
   ) {
+    const blockId = targetBlockId ?? state.longestChainStartId;
+    // @TODO: Refactor nested ifs
+    if (
+      state.stacks.blocks[blockId].state !== StacksBlockState.NEW &&
+      state.stacks.blocks[blockId].state !== StacksBlockState.BLESSED
+    ) {
+      throw new Error("Trying to mine unmineable block");
+    }
+
     const nextId = state.lastId + 1;
     const { bitcoin, stacks: updatedStacksChain } = mineBlock(
-      targetBlockId,
+      blockId,
       nextId,
       chain,
       state
@@ -269,15 +276,26 @@ export function reducer(state: UiState, action: BlockAction): UiState {
     return {
       stacks,
       bitcoin,
-      actions: [...state.actions, action],
+      actions: [
+        ...state.actions,
+        {
+          ...action,
+          targetBlockId: targetBlockId ?? state.longestChainStartId,
+        },
+      ],
       longestChainStartId: getLongestChainStartId(stacks),
       lastId: nextId,
     };
   }
 
   if (isHoverAction(action) && chain === Chain.STX) {
+    const blockId = targetBlockId ?? state.longestChainStartId;
+    // @TODO: Refactor nested ifs
+    if (!blockId) {
+      throw new Error("Trying to hover invalid block");
+    }
     const stacks = highlighBlock(
-      targetBlockId,
+      blockId,
       state.stacks,
       action.value as boolean
     );
@@ -288,8 +306,13 @@ export function reducer(state: UiState, action: BlockAction): UiState {
   }
 
   if (isHoverAction(action) && chain === Chain.BTC) {
+    const blockId = targetBlockId ?? state.longestChainStartId;
+    // @TODO: Refactor nested ifs
+    if (!blockId) {
+      throw new Error("Trying to hover invalid block");
+    }
     const bitcoin = highlighBlock(
-      targetBlockId,
+      blockId,
       state.bitcoin,
       action.value as boolean
     );

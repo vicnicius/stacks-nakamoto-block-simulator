@@ -11,7 +11,7 @@ export enum BlockActionType {
 
 interface CommonBlockAction {
   type: Omit<BlockActionType, BlockActionType.HOVER>;
-  targetBlockId: string;
+  targetBlockId?: string;
   chain: Chain;
 }
 

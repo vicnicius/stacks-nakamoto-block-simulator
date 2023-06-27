@@ -1,0 +1,31 @@
+.BulkActionsWrapper {
+  background-color: #000000;
+  color: white;
+  position: relative;
+  display: flex;
+  width: 300px;
+  margin-left: -150px;
+}
+.BulkActionButton {
+  appearance: none;
+  background: #000000;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  cursor: pointer;
+  flex: 1;
+  padding: 4px 0;
+  transition: all 0.2s ease-in-out;
+}
+.BulkActionButton:first-of-type {
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+  border-right: none;
+}
+.BulkActionButton:last-of-type {
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+  border-left: none;
+}
+.BulkActionButton:hover {
+  background-color: #222222;
+}
