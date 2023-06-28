@@ -1,4 +1,4 @@
-import React, { Dispatch } from "react";
+import { Dispatch, createContext } from "react";
 import {
   BitcoinBlock,
   BlockPosition,
@@ -12,9 +12,16 @@ import {
   isHoverAction,
 } from "./domain/BlockAction";
 import { Blockchain } from "./domain/Blockchain";
+import { TimeAction, TimeActionType, isTimeAction } from "./domain/TimeAction";
 
 const FINALIZED_BLOCKS_DEPTH = 100;
 const FROZEN_BLOCKS_DEPTH = 6;
+
+export interface TimeAwareUiState {
+  past: UiState[];
+  present: UiState;
+  future: UiState[];
+}
 
 export interface UiState {
   [Chain.BTC]: Blockchain<Chain.BTC>;
@@ -246,7 +253,7 @@ function applyRules(
   return { ...chain };
 }
 
-export function reducer(state: UiState, action: BlockAction): UiState {
+function reducer(state: UiState, action: BlockAction): UiState {
   const { chain, type, targetBlockId } = action;
 
   // Mining Stacks blocks
@@ -327,6 +334,49 @@ export function reducer(state: UiState, action: BlockAction): UiState {
   };
 }
 
+export function timeAwareReducer(
+  state: TimeAwareUiState,
+  action: BlockAction | TimeAction
+): TimeAwareUiState {
+  const { past, present, future } = state;
+  if (!isTimeAction(action)) {
+    const newPresent = reducer(present, action);
+    // We don't want to store hover actions
+    const newPast = isHoverAction(action) ? past : [...past, present];
+    return {
+      past: newPast,
+      present: newPresent,
+      future,
+    };
+  }
+  if (action.type === TimeActionType.UNDO) {
+    const previous = past[past.length - 1];
+    return {
+      past: past.slice(0, past.length - 1),
+      present: previous,
+      future: [present, ...future],
+    };
+  }
+  if (action.type === TimeActionType.REDO && future.length > 0) {
+    const next = future[0];
+    return {
+      past: [...past, present],
+      present: next,
+      future: future.slice(1),
+    };
+  }
+  // eslint-disable-next-line no-console
+  console.warn("Reducer was called by no action was matched.", {
+    state,
+    action,
+  });
+  return {
+    past,
+    present,
+    future,
+  };
+}
+
 // The Blockchain interface describes the data structure that we will use to render the blocks.
 // Each block can have a number of children blocks, and each block has it's own state.
 export const initialStacksChain: Blockchain<Chain.STX> = {
@@ -356,16 +406,20 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
   },
 };
 
-export const UiStateContext = React.createContext<{
-  state: UiState;
-  dispatch: Dispatch<BlockAction>;
+export const UiStateContext = createContext<{
+  state: TimeAwareUiState;
+  dispatch: Dispatch<BlockAction | TimeAction>;
 }>({
   state: {
-    bitcoin: initialBitcoinChain,
-    stacks: initialStacksChain,
-    actions: [],
-    lastId: 1,
-    longestChainStartId: "1",
+    past: [],
+    present: {
+      bitcoin: initialBitcoinChain,
+      stacks: initialStacksChain,
+      actions: [],
+      lastId: 1,
+      longestChainStartId: "1",
+    },
+    future: [],
   },
   dispatch: () => undefined,
 });

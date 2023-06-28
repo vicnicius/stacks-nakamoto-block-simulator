@@ -79,6 +79,10 @@ export const Canvas: FC = () => {
   const { height, width, maxYRightScroll, maxYLeftScroll } =
     useContext(DimensionsContext);
   const { state } = useContext(UiStateContext);
+  // eslint-disable-next-line no-console
+  console.log({ state });
+  const stacks = state.present.stacks;
+  const bitcoin = state.present.bitcoin;
   const { debug } = useContext(DebugContext);
 
   return (
@@ -113,8 +117,8 @@ export const Canvas: FC = () => {
           >
             <Lights />
             <Camera isometric />
-            <BlockchainRender chain={state.stacks} ref={stacksRef} />
-            <BlockchainRender chain={state.bitcoin} ref={bitcoinRef} />
+            <BlockchainRender chain={stacks} ref={stacksRef} />
+            <BlockchainRender chain={bitcoin} ref={bitcoinRef} />
             <HUDScene />
             <GridHelper />
             <AxesHelper />

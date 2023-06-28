@@ -3,7 +3,7 @@ import {
   UiStateContext,
   initialBitcoinChain,
   initialStacksChain,
-  reducer,
+  timeAwareReducer,
 } from "./UiState";
 import { DebugContext } from "./domain/Debug";
 import {
@@ -81,12 +81,16 @@ export const App: FC = () => {
     }
   }, [metaKeyDown, alternateKeyDown]);
 
-  const [state, dispatch] = useReducer(reducer, {
-    bitcoin: initialBitcoinChain,
-    stacks: initialStacksChain,
-    longestChainStartId: "1",
-    actions: [],
-    lastId: 1,
+  const [state, dispatch] = useReducer(timeAwareReducer, {
+    past: [],
+    present: {
+      bitcoin: initialBitcoinChain,
+      stacks: initialStacksChain,
+      longestChainStartId: "1",
+      actions: [],
+      lastId: 1,
+    },
+    future: [],
   });
 
   return (

@@ -23,7 +23,9 @@ const InlineIcon = ({
 export const ActionTimeline: FC = () => {
   const { height } = useContext(DimensionsContext);
   const {
-    state: { actions },
+    state: {
+      present: { actions },
+    },
   } = useContext(UiStateContext);
 
   return (

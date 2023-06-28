@@ -1,4 +1,6 @@
-import React, { FC, PropsWithChildren, useState } from "react";
+import React, { FC, PropsWithChildren, useContext, useState } from "react";
+import { UiStateContext } from "../../../UiState";
+import { TimeActionType } from "../../../domain/TimeAction";
 import { Button } from "../button/Button";
 import "./ActionBar.css";
 
@@ -17,6 +19,7 @@ const ActionTooltip: FC<PropsWithChildren<{ active: boolean }>> = ({
 
 export const ActionBar: FC = () => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const { dispatch } = useContext(UiStateContext);
   const mouseHandler = (item: string) => ({
     onMouseEnter: () => setHoveredItem(item),
     onMouseLeave: () => setHoveredItem(null),
@@ -24,11 +27,19 @@ export const ActionBar: FC = () => {
   return (
     <ul className="ActionBar">
       <ActionBarItem>
-        <Button icon="undo" {...mouseHandler("undo")} />
+        <Button
+          icon="undo"
+          {...mouseHandler("undo")}
+          onClick={() => dispatch({ type: TimeActionType.UNDO })}
+        />
         <ActionTooltip active={hoveredItem === "undo"}>undo</ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
-        <Button icon="redo" {...mouseHandler("redo")} />
+        <Button
+          icon="redo"
+          {...mouseHandler("redo")}
+          onClick={() => dispatch({ type: TimeActionType.REDO })}
+        />
         <ActionTooltip active={hoveredItem === "redo"}>redo</ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
