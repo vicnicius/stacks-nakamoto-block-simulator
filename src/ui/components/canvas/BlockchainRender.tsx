@@ -1,15 +1,23 @@
-import { useSpring, animated } from "@react-spring/three";
-import React, { FC, useContext, useEffect, useMemo } from "react";
-import { Vector3 } from "three";
+import { animated } from "@react-spring/three";
+import React, {
+  ForwardRefRenderFunction,
+  forwardRef,
+  useContext,
+  useEffect,
+  useMemo,
+} from "react";
+import { Group } from "three";
 import { Chain } from "../../../domain/Block";
 import { Blockchain } from "../../../domain/Blockchain";
 import { DimensionsContext, blockSpace } from "../../../domain/Dimensions";
 import { BlockRender } from "./components/BlockRender";
 
-export const BlockchainRender: FC<{
-  chain: Blockchain<Chain.STX | Chain.BTC>;
-  translateY?: number;
-}> = ({ chain, translateY }) => {
+const BlockchainRenderCore: ForwardRefRenderFunction<
+  Group,
+  {
+    chain: Blockchain<Chain.STX | Chain.BTC>;
+  }
+> = ({ chain }, ref) => {
   const { setMaxYLeftScroll, setMaxYRightScroll, height } =
     useContext(DimensionsContext);
   const blockIds = Object.keys(chain.blocks);
@@ -30,23 +38,15 @@ export const BlockchainRender: FC<{
     }
   }, [maxHeight]);
 
-  const y =
-    translateY === undefined || translateY <= 0
-      ? 0
-      : translateY >= maxHeight
-      ? maxHeight
-      : translateY;
-  const { position } = useSpring({
-    position: [0, y, 0],
-    config: { mass: 0.15, tension: 5, friction: 5, precision: 0.0001 },
-  });
   const { blocks } = chain;
   return (
     // @TODO: fix this type casting
-    <animated.group position={position as unknown as Vector3}>
+    <animated.group ref={ref}>
       {blockIds.map((id) => (
         <BlockRender key={id} block={blocks[id]} id={id} chain={chain} />
       ))}
     </animated.group>
   );
 };
+
+export const BlockchainRender = forwardRef(BlockchainRenderCore);

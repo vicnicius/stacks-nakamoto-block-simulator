@@ -1,103 +1,126 @@
-import { Environment, OrbitControls } from "@react-three/drei";
+import {
+  Environment,
+  OrbitControls,
+  PerformanceMonitor,
+} from "@react-three/drei";
 import { Canvas as FiberCanvas } from "@react-three/fiber";
-import throttle from "lodash/throttle";
-import React, { FC, useContext, useState } from "react";
+import React, {
+  FC,
+  MutableRefObject,
+  useContext,
+  useRef,
+  useState,
+} from "react";
+import { Group, MathUtils } from "three";
 import { UiStateContext } from "../../../UiState";
 import { DebugContext } from "../../../domain/Debug";
 import { DimensionsContext } from "../../../domain/Dimensions";
 import { BlockchainRender } from "./BlockchainRender";
-import "./Canvas.css";
 import { HUDScene } from "./HUDScene";
 import { AxesHelper } from "./components/AxesHelper";
 import { Camera } from "./components/Camera";
 import { GridHelper } from "./components/GridHelper";
 import { Lights } from "./components/Lights";
 import { colors } from "./helpers";
+import "./Canvas.css";
 
-const handleScroll = throttle(
-  ({
-    deltaY,
-    pageX,
-    width,
-    leftTranslateY,
-    rightTranslateY,
-    setLeftTranslateY,
-    setRightTranslateY,
-    maxYLeftScroll,
-    maxYRightScroll,
-    nativeEvent,
-  }) => {
-    nativeEvent.preventDefault();
-    const newLeftTranslateY = deltaY + leftTranslateY;
-    if (
-      pageX < width / 2 &&
-      newLeftTranslateY >= 0 &&
-      newLeftTranslateY < maxYLeftScroll
-    ) {
-      setLeftTranslateY(newLeftTranslateY);
-    }
-    const newRightTranslateY = deltaY + rightTranslateY;
-    if (
-      pageX > width / 2 &&
-      newRightTranslateY >= 0 &&
-      newRightTranslateY < maxYRightScroll
-    ) {
-      setRightTranslateY(newRightTranslateY);
-    }
-  },
-  150,
-  { leading: true }
-);
+const handleScroll = ({
+  deltaY,
+  pageX,
+  width,
+  maxYLeftScroll,
+  maxYRightScroll,
+  nativeEvent,
+  leftRef,
+  rightRef,
+}: {
+  deltaY: number;
+  pageX: number;
+  width: number;
+  maxYLeftScroll: number;
+  maxYRightScroll: number;
+  nativeEvent: WheelEvent;
+  leftRef: MutableRefObject<Group>;
+  rightRef: MutableRefObject<Group>;
+}) => {
+  nativeEvent.preventDefault();
+  const newLeftTranslateY = deltaY + leftRef.current.position.y;
+  if (
+    pageX < width / 2 &&
+    newLeftTranslateY >= 0 &&
+    newLeftTranslateY < maxYLeftScroll
+  ) {
+    leftRef.current.position.y = MathUtils.lerp(
+      leftRef.current.position.y,
+      newLeftTranslateY,
+      0.1
+    );
+  }
+  const newRightTranslateY = deltaY + rightRef.current.position.y;
+  if (
+    pageX > width / 2 &&
+    newRightTranslateY >= 0 &&
+    newRightTranslateY < maxYRightScroll
+  ) {
+    rightRef.current.position.y = MathUtils.lerp(
+      rightRef.current.position.y,
+      newRightTranslateY,
+      0.1
+    );
+  }
+};
 
 export const Canvas: FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const stacksRef = useRef<Group>(null!);
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const bitcoinRef = useRef<Group>(null!);
+  const [dpr, setDpr] = useState(1.5);
   const { height, width, maxYRightScroll, maxYLeftScroll } =
     useContext(DimensionsContext);
   const { state } = useContext(UiStateContext);
   const { debug } = useContext(DebugContext);
-  const [leftTranslateY, setLeftTranslateY] = useState(0);
-  const [rightTranslateY, setRightTranslateY] = useState(0);
 
   return (
     <section className="CanvasWrapper">
       <FiberCanvas
-        dpr={[1, 2]}
+        dpr={dpr}
         style={{ height, width }}
         onWheel={({ deltaY, pageX, nativeEvent }) =>
           handleScroll({
             deltaY,
             pageX,
             width,
-            leftTranslateY,
-            rightTranslateY,
             maxYLeftScroll,
             maxYRightScroll,
-            setLeftTranslateY,
-            setRightTranslateY,
             nativeEvent,
+            leftRef: stacksRef,
+            rightRef: bitcoinRef,
           })
         }
       >
-        <color attach={"background"} args={[colors.baseGray]} />
-        <Environment
-          background
-          blur={1}
-          near={1}
-          far={1000}
-          files={"/assets/environments/studio.hdr"}
-          resolution={256}
+        <PerformanceMonitor
+          onChange={({ factor }) => setDpr(0.5 + 1.5 * factor)}
         >
-          <Lights />
-          <Camera isometric />
-          <BlockchainRender chain={state.stacks} translateY={leftTranslateY} />
-          <BlockchainRender
-            chain={state.bitcoin}
-            translateY={rightTranslateY}
-          />
-          <HUDScene />
-          <GridHelper />
-          <AxesHelper />
-          {debug && <OrbitControls />}
-        </Environment>
+          <color attach={"background"} args={[colors.baseGray]} />
+          <Environment
+            background
+            blur={1}
+            near={1}
+            far={1000}
+            files={"/assets/environments/studio.hdr"}
+            resolution={256}
+          >
+            <Lights />
+            <Camera isometric />
+            <BlockchainRender chain={state.stacks} ref={stacksRef} />
+            <BlockchainRender chain={state.bitcoin} ref={bitcoinRef} />
+            <HUDScene />
+            <GridHelper />
+            <AxesHelper />
+            {debug && <OrbitControls />}
+          </Environment>
+        </PerformanceMonitor>
       </FiberCanvas>
     </section>
   );
