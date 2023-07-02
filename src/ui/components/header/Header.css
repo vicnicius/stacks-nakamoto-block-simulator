@@ -1,5 +1,6 @@
 .Header {
-    align-items: center;
-    display: flex;
-    justify-content: space-between;
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
 }

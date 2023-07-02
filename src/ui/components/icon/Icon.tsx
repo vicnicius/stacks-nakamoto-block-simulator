@@ -1,5 +1,6 @@
 import React, { FC } from "react";
 import { ReactComponent as Fork } from "./resources/fork.svg";
+import { ReactComponent as ListFilled } from "./resources/list-filled.svg";
 import { ReactComponent as List } from "./resources/list.svg";
 import { ReactComponent as Load } from "./resources/load.svg";
 import { ReactComponent as Mine } from "./resources/mine.svg";
@@ -12,6 +13,7 @@ import { ReactComponent as ZoomOut } from "./resources/zoom-out.svg";
 export type Icons =
   | "fork"
   | "list"
+  | "list-filled"
   | "load"
   | "mine"
   | "redo"
@@ -28,6 +30,9 @@ interface IconProps {
 export const Icon: FC<IconProps> = ({ className, name }) => {
   if (name === "list") {
     return <List className={className} />;
+  }
+  if (name === "list-filled") {
+    return <ListFilled className={className} />;
   }
   if (name === "load") {
     return <Load className={className} />;

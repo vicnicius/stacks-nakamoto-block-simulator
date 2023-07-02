@@ -17,11 +17,17 @@ const ActionTooltip: FC<PropsWithChildren<{ active: boolean }>> = ({
   </span>
 );
 
-export const ActionBar: FC = () => {
+export const ActionBar: FC<{
+  toggleActionTimeline: () => void;
+  isActionTimelineVisible: boolean;
+}> = ({ toggleActionTimeline, isActionTimelineVisible }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const { dispatch } = useContext(UiStateContext);
   const mouseHandler = (item: string) => ({
-    onMouseEnter: () => setHoveredItem(item),
+    onMouseEnter: () => {
+      if (item === "list" && isActionTimelineVisible) return;
+      setHoveredItem(item);
+    },
     onMouseLeave: () => setHoveredItem(null),
   });
   return (
@@ -43,8 +49,15 @@ export const ActionBar: FC = () => {
         <ActionTooltip active={hoveredItem === "redo"}>redo</ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
-        <Button icon="list" {...mouseHandler("list")} />
-        <ActionTooltip active={hoveredItem === "list"}>list</ActionTooltip>
+        <Button
+          icon={isActionTimelineVisible ? "list-filled" : "list"}
+          {...mouseHandler("list")}
+          onClick={() => {
+            toggleActionTimeline();
+            setHoveredItem(null);
+          }}
+        />
+        <ActionTooltip active={hoveredItem === "list"}>actions</ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
         <Button icon="load" {...mouseHandler("load")} />

@@ -1,7 +1,6 @@
 import { Hud } from "@react-three/drei";
 import React, { FC, useContext } from "react";
 import { DimensionsContext } from "../../../domain/Dimensions";
-import { ActionTimeline } from "./components/ActionTimeline";
 import { BulkActions } from "./components/BulkActions";
 import { Camera } from "./components/Camera";
 import { DividerLine } from "./components/DividerLine";
@@ -36,7 +35,6 @@ export const HUDScene: FC = () => {
       <Title anchor={"left"} position={bitcoinTitlePosition}>
         Bitcoin
       </Title>
-      <ActionTimeline />
     </Hud>
   );
 };

@@ -1,18 +1,22 @@
 .Button {
-    align-items: center;
-    background-color: black;
-    border: none;
-    display: flex;
-    height: 32px;
-    justify-content: center;
-    position: relative;
-    text-align: center;
-    text-decoration: none;
-    width: 32px;
-    transition: all ease-out 0.2s;
+  align-items: center;
+  background-color: black;
+  border: none;
+  display: flex;
+  height: 32px;
+  justify-content: center;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  width: 32px;
+  transition: all ease-out 0.15s;
 }
 
 .Button:hover {
-    cursor: pointer;
-    transform: scale(1.24);
+  cursor: pointer;
+  transform: scale(1.24);
+}
+
+.Button--no-animation:hover {
+  transform: none;
 }
