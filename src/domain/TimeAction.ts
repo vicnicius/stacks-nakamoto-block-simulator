@@ -1,10 +1,12 @@
 export enum TimeActionType {
   UNDO = "undo",
   REDO = "redo",
+  PREVIEW = "preview",
 }
 
 export interface TimeAction {
   type: TimeActionType;
+  targetActionIndex?: number;
 }
 
 function checkIfIsObject(
@@ -18,6 +20,8 @@ function checkIfIsObject(
 export function isTimeAction(action: unknown): action is TimeAction {
   checkIfIsObject(action);
   return (
-    action.type === TimeActionType.UNDO || action.type === TimeActionType.REDO
+    action.type === TimeActionType.UNDO ||
+    action.type === TimeActionType.REDO ||
+    action.type === TimeActionType.PREVIEW
   );
 }

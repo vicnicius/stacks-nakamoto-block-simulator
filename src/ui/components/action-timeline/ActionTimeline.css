@@ -32,6 +32,16 @@
   display: flex;
   font-size: 14px;
   padding: 8px 0;
+  transition: all ease-out 0.15s;
+}
+
+.ActionTimelineItem--highlighted {
+  font-weight: bold;
+  transform: scale(1.1);
+}
+
+.ActionTimelineItem:hover {
+  cursor: pointer;
 }
 
 .ActionTimelineIcon {

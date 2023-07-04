@@ -79,10 +79,8 @@ export const Canvas: FC = () => {
   const { height, width, maxYRightScroll, maxYLeftScroll } =
     useContext(DimensionsContext);
   const { state } = useContext(UiStateContext);
-  // eslint-disable-next-line no-console
-  console.log({ state });
-  const stacks = state.present.stacks;
-  const bitcoin = state.present.bitcoin;
+  const stacks = state.preview?.stacks || state.present.stacks;
+  const bitcoin = state.preview?.bitcoin || state.present.bitcoin;
   const { debug } = useContext(DebugContext);
 
   return (

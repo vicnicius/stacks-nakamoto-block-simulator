@@ -21,6 +21,7 @@ export interface TimeAwareUiState {
   past: UiState[];
   present: UiState;
   future: UiState[];
+  preview?: UiState;
 }
 
 export interface UiState {
@@ -212,7 +213,8 @@ function freezeChildren(chain: Blockchain<Chain.STX>, id: string) {
 
 function applyRules(
   chain: Blockchain<Chain.STX>,
-  startId: string
+  startId: string,
+  resetHighlight = false
 ): Blockchain<Chain.STX> {
   let depth = 1;
   let previousId: undefined | string = undefined;
@@ -230,15 +232,18 @@ function applyRules(
           freezeChildren(chain, childId);
         }
       });
-    }
-
-    if (depth > FINALIZED_BLOCKS_DEPTH) {
+    } else if (depth > FINALIZED_BLOCKS_DEPTH) {
       chain.blocks[currentId].state = StacksBlockState.FINALIZED;
+    } else if (currentBlock.state !== StacksBlockState.BLESSED) {
+      chain.blocks[currentId].state = StacksBlockState.NEW;
     }
     depth = depth + 1;
     previousId = currentId;
     currentId = currentBlock.parentId;
     currentBlock = chain.blocks[currentBlock.parentId];
+    if (resetHighlight) {
+      currentBlock.isHighlighted = false;
+    }
   }
   if (
     currentBlock.parentId === undefined &&
@@ -246,10 +251,21 @@ function applyRules(
     depth <= FINALIZED_BLOCKS_DEPTH
   ) {
     chain.blocks[currentId].state = StacksBlockState.FROZEN;
-  }
-  if (currentBlock.parentId === undefined && depth > FINALIZED_BLOCKS_DEPTH) {
+  } else if (
+    currentBlock.parentId === undefined &&
+    depth > FINALIZED_BLOCKS_DEPTH
+  ) {
     chain.blocks[currentId].state = StacksBlockState.FINALIZED;
+  } else if (
+    currentBlock.parentId === undefined &&
+    currentBlock.state !== StacksBlockState.BLESSED
+  ) {
+    chain.blocks[currentId].state = StacksBlockState.NEW;
   }
+  if (resetHighlight) {
+    chain.blocks[currentId].isHighlighted = false;
+  }
+
   return { ...chain };
 }
 
@@ -363,6 +379,42 @@ export function timeAwareReducer(
       past: [...past, present],
       present: next,
       future: future.slice(1),
+    };
+  }
+  if (
+    action.type === TimeActionType.PREVIEW &&
+    action.targetActionIndex === undefined
+  ) {
+    const stacks = applyRules(
+      present.stacks,
+      present.longestChainStartId,
+      true
+    );
+    return {
+      ...state,
+      present: {
+        ...present,
+        stacks,
+      },
+      preview: undefined,
+    };
+  }
+  if (
+    action.type === TimeActionType.PREVIEW &&
+    action.targetActionIndex !== undefined
+  ) {
+    const preview = past[action.targetActionIndex + 1] ?? present;
+    const stacks = applyRules(
+      preview.stacks,
+      preview.longestChainStartId,
+      true
+    );
+    return {
+      ...state,
+      preview: {
+        ...preview,
+        stacks,
+      },
     };
   }
   // eslint-disable-next-line no-console
