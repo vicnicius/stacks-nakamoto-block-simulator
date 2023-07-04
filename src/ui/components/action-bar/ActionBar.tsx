@@ -1,5 +1,6 @@
 import React, { FC, PropsWithChildren, useContext, useState } from "react";
 import { UiStateContext } from "../../../UiState";
+import { DimensionsContext } from "../../../domain/Dimensions";
 import { TimeActionType } from "../../../domain/TimeAction";
 import { Button } from "../button/Button";
 import "./ActionBar.css";
@@ -23,19 +24,27 @@ export const ActionBar: FC<{
 }> = ({ toggleActionTimeline, isActionTimelineVisible }) => {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const { dispatch } = useContext(UiStateContext);
-  const mouseHandler = (item: string) => ({
+  const { zoom, setZoom } = useContext(DimensionsContext);
+  const baseMouseHandler = (item: string) => ({
     onMouseEnter: () => {
       if (item === "list" && isActionTimelineVisible) return;
       setHoveredItem(item);
     },
     onMouseLeave: () => setHoveredItem(null),
   });
+  const onZoomIn = () => {
+    setZoom(zoom + 0.1);
+  };
+
+  const onZoomOut = () => {
+    setZoom(zoom - 0.1);
+  };
   return (
     <ul className="ActionBar">
       <ActionBarItem>
         <Button
           icon="undo"
-          {...mouseHandler("undo")}
+          {...baseMouseHandler("undo")}
           onClick={() => dispatch({ type: TimeActionType.UNDO })}
         />
         <ActionTooltip active={hoveredItem === "undo"}>undo</ActionTooltip>
@@ -43,7 +52,7 @@ export const ActionBar: FC<{
       <ActionBarItem>
         <Button
           icon="redo"
-          {...mouseHandler("redo")}
+          {...baseMouseHandler("redo")}
           onClick={() => dispatch({ type: TimeActionType.REDO })}
         />
         <ActionTooltip active={hoveredItem === "redo"}>redo</ActionTooltip>
@@ -51,7 +60,7 @@ export const ActionBar: FC<{
       <ActionBarItem>
         <Button
           icon={isActionTimelineVisible ? "list-filled" : "list"}
-          {...mouseHandler("list")}
+          {...baseMouseHandler("list")}
           onClick={() => {
             toggleActionTimeline();
             setHoveredItem(null);
@@ -60,21 +69,29 @@ export const ActionBar: FC<{
         <ActionTooltip active={hoveredItem === "list"}>actions</ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
-        <Button icon="load" {...mouseHandler("load")} />
+        <Button icon="load" {...baseMouseHandler("load")} />
         <ActionTooltip active={hoveredItem === "load"}>load</ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
-        <Button icon="save" {...mouseHandler("save")} />
+        <Button icon="save" {...baseMouseHandler("save")} />
         <ActionTooltip active={hoveredItem === "save"}>save</ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
-        <Button icon="zoom-in" {...mouseHandler("zoom-in")} />
+        <Button
+          icon="zoom-in"
+          {...baseMouseHandler("zoom-in")}
+          onClick={onZoomIn}
+        />
         <ActionTooltip active={hoveredItem === "zoom-in"}>
           zoom in
         </ActionTooltip>
       </ActionBarItem>
       <ActionBarItem>
-        <Button icon="zoom-out" {...mouseHandler("zoom-out")} />
+        <Button
+          icon="zoom-out"
+          {...baseMouseHandler("zoom-out")}
+          onClick={onZoomOut}
+        />
         <ActionTooltip active={hoveredItem === "zoom-out"}>
           zoom out
         </ActionTooltip>

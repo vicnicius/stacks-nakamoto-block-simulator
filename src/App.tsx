@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useReducer, useState } from "react";
+import React, { FC, useCallback, useEffect, useReducer, useState } from "react";
 import {
   UiStateContext,
   initialBitcoinChain,
@@ -17,6 +17,7 @@ import { Header } from "./ui/components/header/Header";
 import "./App.css";
 
 export const App: FC = () => {
+  const [zoom, setZoom] = useState(1);
   const [metaKeyDown, setMetaKeyDown] = useState(false);
   const [alternateKeyDown, setAlternateKeyDown] = useState(false);
   const [debugMode, setDebugMode] = useState(false);
@@ -28,10 +29,6 @@ export const App: FC = () => {
   // Canvas width is the window width minus two times the margin size for
   // the page margins.
   const [width, setWidth] = useState(window.innerWidth - 2 * marginSize);
-  // The sceneWidth sets the whole width of the scene in its own coordinate unit
-  const [sceneWidth, setSceneWidth] = useState(0);
-  // The sceneHeight sets the whole height of the scene in its own coordinate unit
-  const [sceneHeight, setSceneHeight] = useState(0);
   // The maxYLeftScroll sets the maximum amount of pixels that the user can scroll
   const [maxYLeftScroll, setMaxYLeftScroll] = useState(9999);
   // the maxYRightScroll sets the maximum amount of pixels that the user can scroll
@@ -81,6 +78,10 @@ export const App: FC = () => {
     }
   }, [metaKeyDown, alternateKeyDown]);
 
+  const handleSetZoom = useCallback((newZoom: number) => {
+    setZoom(newZoom);
+  }, []);
+
   const [state, dispatch] = useReducer(timeAwareReducer, {
     past: [],
     present: {
@@ -101,14 +102,12 @@ export const App: FC = () => {
           width,
           height,
           aspect,
-          sceneHeight,
-          sceneWidth,
           maxYLeftScroll,
           maxYRightScroll,
-          setSceneHeight,
-          setSceneWidth,
           setMaxYLeftScroll,
           setMaxYRightScroll,
+          zoom,
+          setZoom: handleSetZoom,
         }}
       >
         <DebugContext.Provider value={{ debug: debugMode }}>

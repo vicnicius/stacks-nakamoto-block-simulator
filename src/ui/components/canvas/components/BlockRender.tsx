@@ -30,12 +30,13 @@ import { BlockPopup } from "./BlockPopup";
 
 function getIsometricCoordinates(
   horizontalDistance: number,
-  verticalDistance: number
+  verticalDistance: number,
+  zoom: number
 ): [x: number, y: number, z: number] {
   const x = horizontalDistance * Math.sqrt(2);
   const y = verticalDistance;
   const z = -horizontalDistance * Math.sqrt(2);
-  return [x, y, z];
+  return [x / zoom, y, z / zoom];
 }
 
 const cubeHorizontalDistance = blockSpace;
@@ -45,8 +46,15 @@ const getAnchorsFromPosition: (
   position: BlockPosition,
   spaceWidth: number,
   spaceHeight: number,
-  chain: Chain
-) => [number, number, number] = (position, spaceWidth, spaceHeight, chain) => {
+  chain: Chain,
+  zoom: number
+) => [number, number, number] = (
+  position,
+  spaceWidth,
+  spaceHeight,
+  chain,
+  zoom
+) => {
   const { vertical: positionY, horizontal: positionX } = position;
   const initialY = (spaceHeight / 2) * Math.SQRT2 - cubeSize * 2;
   const initialX = -spaceWidth / 8;
@@ -54,17 +62,18 @@ const getAnchorsFromPosition: (
     (chain === Chain.STX ? initialX : -initialX) +
     (cubeHorizontalDistance * positionX) / 2;
   const cubeY = initialY - cubeVerticalDistance * (positionY + 1);
-  return getIsometricCoordinates(cubeX, cubeY);
+  return getIsometricCoordinates(cubeX, cubeY, zoom);
 };
 
 const Connections: FC<{
   connections: BlockConnection[];
   isHighlighted: boolean;
 }> = ({ connections, isHighlighted }) => {
+  const { zoom } = useContext(DimensionsContext);
   const deltaY = cubeSize * Math.SQRT2;
   const points: [number, number, number][] = [];
   connections.forEach((connection: BlockConnection, index: number) => {
-    const deltaX = cubeHorizontalDistance * Math.SQRT2;
+    const deltaX = (cubeHorizontalDistance * Math.SQRT2) / zoom;
     // If it's right behind the parent, we just draw a straight line
     if (connection === BlockConnection.TOP && connections.length === 2) {
       return points.push([0, 0, 0], [0, deltaY * 2, 0]);
@@ -208,7 +217,7 @@ export const BlockRender: FC<{
   block: Block;
   chain: Blockchain<Chain.STX | Chain.BTC>;
 }> = ({ block, id, chain }) => {
-  const { height, width } = useContext(DimensionsContext);
+  const { height, width, zoom } = useContext(DimensionsContext);
   const { dispatch } = useContext(UiStateContext);
   const [isHovering, setIsHovering] = useState(false);
   const hasChildren = block.childrenIds.length > 0;
@@ -261,7 +270,8 @@ export const BlockRender: FC<{
     block.position,
     width,
     height,
-    block.type
+    block.type,
+    zoom
   );
   const outerBlockColor = useSpring({ color: getBlockColor(block) });
   const connections = useMemo(

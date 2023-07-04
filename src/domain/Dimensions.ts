@@ -21,25 +21,21 @@ export const DimensionsContext = createContext<{
   width: number;
   height: number;
   blockSpace: number;
-  sceneHeight: number;
-  sceneWidth: number;
-  setSceneHeight: (height: number) => void;
-  setSceneWidth: (width: number) => void;
   maxYLeftScroll: number;
   maxYRightScroll: number;
   setMaxYLeftScroll: (maxYLeftScroll: number) => void;
   setMaxYRightScroll: (maxYRightScroll: number) => void;
+  zoom: number;
+  setZoom: (zoom: number) => void;
 }>({
   aspect: 16 / 9,
   width: 1024,
   height: 768,
   blockSpace,
-  sceneHeight: 0,
-  sceneWidth: 0,
   maxYLeftScroll: 9999,
   maxYRightScroll: 9999,
+  zoom: 1,
   setMaxYRightScroll: noop,
   setMaxYLeftScroll: noop,
-  setSceneWidth: noop,
-  setSceneHeight: noop,
+  setZoom: noop,
 });

@@ -26,7 +26,7 @@ export const HUDScene: FC = () => {
   ];
   return (
     <Hud>
-      <Camera />
+      <Camera zoom={1} />
       <Title anchor={"right"} position={stacksTitlePosition}>
         Stacks
       </Title>

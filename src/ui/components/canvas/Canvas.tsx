@@ -76,7 +76,7 @@ export const Canvas: FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const bitcoinRef = useRef<Group>(null!);
   const [dpr, setDpr] = useState(1.5);
-  const { height, width, maxYRightScroll, maxYLeftScroll } =
+  const { height, width, maxYRightScroll, maxYLeftScroll, zoom } =
     useContext(DimensionsContext);
   const { state } = useContext(UiStateContext);
   const stacks = state.preview?.stacks || state.present.stacks;
@@ -114,7 +114,7 @@ export const Canvas: FC = () => {
             resolution={256}
           >
             <Lights />
-            <Camera isometric />
+            <Camera isometric zoom={zoom} />
             <BlockchainRender chain={stacks} ref={stacksRef} />
             <BlockchainRender chain={bitcoin} ref={bitcoinRef} />
             <HUDScene />
