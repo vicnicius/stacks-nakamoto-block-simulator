@@ -18,7 +18,7 @@ const BlockchainRenderCore: ForwardRefRenderFunction<
     chain: Blockchain<Chain.STX | Chain.BTC>;
   }
 > = ({ chain }, ref) => {
-  const { setMaxYLeftScroll, setMaxYRightScroll, height } =
+  const { setMaxYLeftScroll, setMaxYRightScroll, height, zoom } =
     useContext(DimensionsContext);
   const blockIds = Object.keys(chain.blocks);
   const maxVerticalPosition = useMemo(() => {
@@ -31,16 +31,15 @@ const BlockchainRenderCore: ForwardRefRenderFunction<
   const maxHeight = maxVerticalPosition * blockSpace;
   useEffect(() => {
     if (chain.name === "stacks") {
-      setMaxYLeftScroll(maxHeight - height / 3);
+      setMaxYLeftScroll((maxHeight - height / 3) / zoom);
     }
     if (chain.name === "bitcoin") {
-      setMaxYRightScroll(maxHeight - height / 3);
+      setMaxYRightScroll((maxHeight - height / 3) / zoom);
     }
   }, [maxHeight]);
 
   const { blocks } = chain;
   return (
-    // @TODO: fix this type casting
     <animated.group ref={ref}>
       {blockIds.map((id) => (
         <BlockRender key={id} block={blocks[id]} id={id} chain={chain} />
