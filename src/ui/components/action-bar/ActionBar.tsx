@@ -46,7 +46,7 @@ export const ActionBar: FC<{
     setDisplayExportFileDialog(false);
   };
 
-  const onSave = () => {
+  const onExport = () => {
     setDisplayExportFileDialog(true);
   };
   return (
@@ -80,12 +80,20 @@ export const ActionBar: FC<{
           <ActionTooltip active={hoveredItem === "list"}>actions</ActionTooltip>
         </ActionBarItem>
         <ActionBarItem>
-          <Button icon="load" {...baseMouseHandler("load")} />
-          <ActionTooltip active={hoveredItem === "load"}>load</ActionTooltip>
+          <Button icon="import" {...baseMouseHandler("import")} />
+          <ActionTooltip active={hoveredItem === "import"}>
+            import
+          </ActionTooltip>
         </ActionBarItem>
         <ActionBarItem>
-          <Button icon="save" {...baseMouseHandler("save")} onClick={onSave} />
-          <ActionTooltip active={hoveredItem === "save"}>save</ActionTooltip>
+          <Button
+            icon="export"
+            {...baseMouseHandler("export")}
+            onClick={onExport}
+          />
+          <ActionTooltip active={hoveredItem === "export"}>
+            export
+          </ActionTooltip>
         </ActionBarItem>
         <ActionBarItem>
           <Button
