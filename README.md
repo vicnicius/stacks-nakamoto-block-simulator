@@ -4,13 +4,22 @@ A Stacks block simulator and visualization tool, with educational purposes
 
 ## :warning: :warning: This repository is under heavy development :warning: :warning:
 
-Consider every line of code experimental.
+The code is still in a experimental state. As soon as the domain is more clear, a lot of moving and renaming will start happening.
 
 ## Introduction
 
 The Stacks blockchain is about to undergo a series of transformative changes that will take its integration into the Bitcoin chain one step further. Those changes, collectively known as the Stacks Nakamoto Release, together with sBTC, will bring Stacks' smart contracts the ability to write to the Bitcoin blockchain, combined with the already present capacity to read from it.
 
 The Stacks Nakamoto release proposes changes to Stacks' consensus algorithm, significantly affecting its security model. Those changes are sometimes challenging to understand. Because of that, the Stacks community is building an interactive tool to help educate its community members and others on how the new consensus algorithm will work. We're calling this tool the Stacks Nakamoto Simulator, and you're looking at it's official repository.
+
+## Design
+
+You can find some design references for the project in the following Figma files:
+
+- [Block Simulator - Grants Design System](https://www.figma.com/file/U9gWHsY6f3pOBt5zyB6vip/Stacks---Grants?type=design&node-id=2787-1121&mode=design&t=kIMrin0uZ4xaVDeY-0)
+- [Block Simulator Prototype ideas](https://www.figma.com/file/bROj8lj8VtSbwBlJ9r2FAX/Nakamoto-Block-Simulator?type=design&node-id=0-1&mode=design&t=LRnwgkJbn79qNDSr-0)
+
+Notice that the implementation will differ in many places.
 
 ## Disclaimer
 
