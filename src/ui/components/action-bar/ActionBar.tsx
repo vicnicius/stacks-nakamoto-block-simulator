@@ -1,10 +1,19 @@
-import React, { FC, PropsWithChildren, useContext, useState } from "react";
-import { UiStateContext } from "../../../UiState";
+import React, {
+  ChangeEvent,
+  FC,
+  PropsWithChildren,
+  useContext,
+  useRef,
+  useState,
+} from "react";
+import { TimeAwareUiState, UiStateContext } from "../../../UiState";
 import { DimensionsContext } from "../../../domain/Dimensions";
+import { ImportAction } from "../../../domain/ImportAction";
 import { TimeActionType } from "../../../domain/TimeAction";
+import { parseFile } from "../../../services/stateManagement";
 import { Button } from "../button/Button";
-import "./ActionBar.css";
 import { FileDialogExport } from "../file-dialog/FileDialog";
+import "./ActionBar.css";
 
 const ActionBarItem: FC<PropsWithChildren> = ({ children }) => (
   <li className="ActionBar-item">{children}</li>
@@ -23,6 +32,7 @@ export const ActionBar: FC<{
   toggleActionTimeline: () => void;
   isActionTimelineVisible: boolean;
 }> = ({ toggleActionTimeline, isActionTimelineVisible }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [displayExportFileDialog, setDisplayExportFileDialog] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const { dispatch } = useContext(UiStateContext);
@@ -48,6 +58,28 @@ export const ActionBar: FC<{
 
   const onExport = () => {
     setDisplayExportFileDialog(true);
+  };
+
+  const onImport = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileImport = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      throw new Error("No file selected");
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const importedState = parseFile(event.target?.result as string);
+      const importAction: ImportAction<TimeAwareUiState> = {
+        type: "import",
+        importedState,
+      };
+
+      dispatch(importAction);
+    };
+    reader.readAsText(file);
   };
   return (
     <>
@@ -80,7 +112,18 @@ export const ActionBar: FC<{
           <ActionTooltip active={hoveredItem === "list"}>actions</ActionTooltip>
         </ActionBarItem>
         <ActionBarItem>
-          <Button icon="import" {...baseMouseHandler("import")} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            id="file"
+            onChange={handleFileImport}
+            hidden
+          />
+          <Button
+            icon="import"
+            {...baseMouseHandler("import")}
+            onClick={onImport}
+          />
           <ActionTooltip active={hoveredItem === "import"}>
             import
           </ActionTooltip>

@@ -39,6 +39,11 @@ async function digestUrlState(): Promise<TimeAwareUiState> {
   return parsedState;
 }
 
+export function parseFile(fileContent: string): TimeAwareUiState {
+  // @todo: Implement a proper validator later
+  return JSON.parse(fileContent);
+}
+
 export async function buildShareableState(
   state: TimeAwareUiState
 ): Promise<{ exportableJson: string; shareUrl: string }> {

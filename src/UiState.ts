@@ -464,7 +464,7 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
 
 export const UiStateContext = createContext<{
   state: TimeAwareUiState;
-  dispatch: Dispatch<BlockAction | TimeAction>;
+  dispatch: Dispatch<BlockAction | TimeAction | ImportAction<TimeAwareUiState>>;
 }>({
   state: {
     past: [],
