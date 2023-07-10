@@ -1,10 +1,6 @@
 import React, { FC, useCallback, useEffect, useReducer, useState } from "react";
-import {
-  UiStateContext,
-  initialBitcoinChain,
-  initialStacksChain,
-  timeAwareReducer,
-} from "./UiState";
+import "./App.css";
+import { UiStateContext, timeAwareReducer } from "./UiState";
 import { DebugContext } from "./domain/Debug";
 import {
   DimensionsContext,
@@ -12,9 +8,12 @@ import {
   headerSize,
   marginSize,
 } from "./domain/Dimensions";
+import {
+  defaultInitialState,
+  getInitialState,
+} from "./services/stateManagement";
 import { Canvas } from "./ui/components/canvas/Canvas";
 import { Header } from "./ui/components/header/Header";
-import "./App.css";
 
 export const App: FC = () => {
   const [zoom, setZoom] = useState(1);
@@ -82,17 +81,16 @@ export const App: FC = () => {
     setZoom(newZoom);
   }, []);
 
-  const [state, dispatch] = useReducer(timeAwareReducer, {
-    past: [],
-    present: {
-      bitcoin: initialBitcoinChain,
-      stacks: initialStacksChain,
-      longestChainStartId: "1",
-      actions: [],
-      lastId: 1,
-    },
-    future: [],
-  });
+  const [state, dispatch] = useReducer(timeAwareReducer, defaultInitialState);
+
+  useEffect(() => {
+    getInitialState()
+      .then((importedState) => {
+        dispatch({ type: "import", importedState });
+      })
+      // eslint-disable-next-line no-console
+      .catch((error) => console.error({ error }));
+  }, []);
 
   return (
     <main className="App">

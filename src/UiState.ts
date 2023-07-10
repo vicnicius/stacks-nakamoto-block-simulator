@@ -12,6 +12,7 @@ import {
   isHoverAction,
 } from "./domain/BlockAction";
 import { Blockchain } from "./domain/Blockchain";
+import { ImportAction, isImportAction } from "./domain/ImportAction";
 import { TimeAction, TimeActionType, isTimeAction } from "./domain/TimeAction";
 
 const FINALIZED_BLOCKS_DEPTH = 100;
@@ -352,9 +353,12 @@ function reducer(state: UiState, action: BlockAction): UiState {
 
 export function timeAwareReducer(
   state: TimeAwareUiState,
-  action: BlockAction | TimeAction
+  action: BlockAction | TimeAction | ImportAction<TimeAwareUiState>
 ): TimeAwareUiState {
   const { past, present, future } = state;
+  if (isImportAction<TimeAwareUiState>(action)) {
+    return action.importedState;
+  }
   if (!isTimeAction(action)) {
     const newPresent = reducer(present, action);
     // We don't want to store hover actions
