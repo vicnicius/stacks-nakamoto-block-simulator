@@ -1,24 +1,16 @@
-import { Hud } from "@react-three/drei";
+import { Html, Hud } from "@react-three/drei";
 import React, { FC, useContext } from "react";
 import { DimensionsContext } from "../../../domain/Dimensions";
 import { BulkActions } from "./components/BulkActions";
 import { Camera } from "./components/Camera";
 import { DividerLine } from "./components/DividerLine";
-import { Title } from "./components/Title";
 import { layout } from "./helpers";
+import { ReactComponent as BitcoinLogo } from "./resources/bitcoin-circle.svg";
+import { ReactComponent as StacksLogo } from "./resources/stacks-circle.svg";
+import "./HUDScene.css";
 
 export const HUDScene: FC = () => {
   const { width, height } = useContext(DimensionsContext);
-  const stacksTitlePosition: [number, number, number] = [
-    -layout.defaultMargin / 2,
-    height / 2,
-    0,
-  ];
-  const bitcoinTitlePosition: [number, number, number] = [
-    layout.defaultMargin / 2,
-    height / 2,
-    0,
-  ];
   const bulkActionPosition: [number, number, number] = [
     -width / 4,
     -height / 2 + layout.defaultMargin * 2,
@@ -27,14 +19,20 @@ export const HUDScene: FC = () => {
   return (
     <Hud>
       <Camera zoom={1} />
-      <Title anchor={"right"} position={stacksTitlePosition}>
-        Stacks
-      </Title>
-      <BulkActions position={bulkActionPosition} />
+      <Html position={[0, height / 2, 0]}>
+        <div className="CanvasTitle">
+          <div className="CanvasTitle-stacks">
+            <StacksLogo />
+            <h2 className="CanvasTitle-text">Stacks</h2>
+          </div>
+          <div className="CanvasTitle-bitcoin">
+            <BitcoinLogo />
+            <h2 className="CanvasTitle-text">Bitcoin</h2>
+          </div>
+        </div>
+      </Html>
       <DividerLine />
-      <Title anchor={"left"} position={bitcoinTitlePosition}>
-        Bitcoin
-      </Title>
+      <BulkActions position={bulkActionPosition} />
     </Hud>
   );
 };
