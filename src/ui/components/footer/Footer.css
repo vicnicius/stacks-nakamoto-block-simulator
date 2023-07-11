@@ -1,0 +1,19 @@
+.Footer-wrapper {
+  justify-content: space-between;
+  display: flex;
+  padding: 32px 0;
+}
+
+.Footer-left,
+.Footer-right {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+}
+
+.Footer-copyright {
+  color: #ffffff;
+  font-size: 16px;
+  margin-left: 16px;
+  padding-top: 5px;
+}

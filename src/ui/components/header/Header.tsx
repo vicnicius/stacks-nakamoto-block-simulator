@@ -11,7 +11,6 @@ export const Header: FC = () => {
       <Logo />
       <ActionBar
         toggleActionTimeline={() => setShowActionTimeline(!showActionTimeline)}
-        isActionTimelineVisible={showActionTimeline}
       />
       <ActionTimeline visible={showActionTimeline} />
     </header>

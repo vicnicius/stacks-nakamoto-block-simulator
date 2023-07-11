@@ -1,8 +1,11 @@
 .CanvasWrapper {
+  background: #121212;
+  border-radius: 24px;
+  border: 0.5px solid #616161;
   display: flex;
   height: 100%;
   margin: 32px 0 0;
+  padding: 0;
   overflow: hidden;
   position: relative;
-  width: 100%;
 }

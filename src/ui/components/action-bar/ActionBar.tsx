@@ -19,31 +19,15 @@ const ActionBarItem: FC<PropsWithChildren> = ({ children }) => (
   <li className="ActionBar-item">{children}</li>
 );
 
-const ActionTooltip: FC<PropsWithChildren<{ active: boolean }>> = ({
-  active,
-  children,
-}) => (
-  <span className={`ActionBar-tooltip ${active && "ActionBar-tooltip--show"}`}>
-    {children}
-  </span>
-);
-
 export const ActionBar: FC<{
   toggleActionTimeline: () => void;
-  isActionTimelineVisible: boolean;
-}> = ({ toggleActionTimeline, isActionTimelineVisible }) => {
+}> = ({ toggleActionTimeline }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [displayExportFileDialog, setDisplayExportFileDialog] = useState(false);
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const { dispatch } = useContext(UiStateContext);
+  const { dispatch, state } = useContext(UiStateContext);
   const { zoom, setZoom } = useContext(DimensionsContext);
-  const baseMouseHandler = (item: string) => ({
-    onMouseEnter: () => {
-      if (item === "list" && isActionTimelineVisible) return;
-      setHoveredItem(item);
-    },
-    onMouseLeave: () => setHoveredItem(null),
-  });
+  const canUndo = state.past.length > 0;
+  const canRedo = state.future.length > 0;
   const onZoomIn = () => {
     setZoom(zoom + 0.1);
   };
@@ -62,6 +46,14 @@ export const ActionBar: FC<{
 
   const onImport = () => {
     fileInputRef.current?.click();
+  };
+
+  const onFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else if (document.exitFullscreen) {
+      document.exitFullscreen();
+    }
   };
 
   const handleFileImport = (e: ChangeEvent<HTMLInputElement>) => {
@@ -86,30 +78,33 @@ export const ActionBar: FC<{
       <ul className="ActionBar">
         <ActionBarItem>
           <Button
+            className={!canUndo ? "ActionBar-item--disabled" : undefined}
             icon="undo"
-            {...baseMouseHandler("undo")}
-            onClick={() => dispatch({ type: TimeActionType.UNDO })}
-          />
-          <ActionTooltip active={hoveredItem === "undo"}>undo</ActionTooltip>
-        </ActionBarItem>
-        <ActionBarItem>
-          <Button
-            icon="redo"
-            {...baseMouseHandler("redo")}
-            onClick={() => dispatch({ type: TimeActionType.REDO })}
-          />
-          <ActionTooltip active={hoveredItem === "redo"}>redo</ActionTooltip>
-        </ActionBarItem>
-        <ActionBarItem>
-          <Button
-            icon={isActionTimelineVisible ? "list-filled" : "list"}
-            {...baseMouseHandler("list")}
             onClick={() => {
-              toggleActionTimeline();
-              setHoveredItem(null);
+              if (canUndo) {
+                dispatch({ type: TimeActionType.UNDO });
+              }
             }}
           />
-          <ActionTooltip active={hoveredItem === "list"}>actions</ActionTooltip>
+        </ActionBarItem>
+        <ActionBarItem>
+          <Button
+            className={!canRedo ? "ActionBar-item--disabled" : undefined}
+            icon="redo"
+            onClick={() => {
+              if (canRedo) {
+                dispatch({ type: TimeActionType.REDO });
+              }
+            }}
+          />
+        </ActionBarItem>
+        <ActionBarItem>
+          <Button
+            icon={"list"}
+            onClick={() => {
+              toggleActionTimeline();
+            }}
+          />
         </ActionBarItem>
         <ActionBarItem>
           <input
@@ -119,44 +114,19 @@ export const ActionBar: FC<{
             onChange={handleFileImport}
             hidden
           />
-          <Button
-            icon="import"
-            {...baseMouseHandler("import")}
-            onClick={onImport}
-          />
-          <ActionTooltip active={hoveredItem === "import"}>
-            import
-          </ActionTooltip>
+          <Button icon="import" onClick={onImport} />
         </ActionBarItem>
         <ActionBarItem>
-          <Button
-            icon="export"
-            {...baseMouseHandler("export")}
-            onClick={onExport}
-          />
-          <ActionTooltip active={hoveredItem === "export"}>
-            export
-          </ActionTooltip>
+          <Button icon="export" onClick={onExport} />
         </ActionBarItem>
         <ActionBarItem>
-          <Button
-            icon="zoom-in"
-            {...baseMouseHandler("zoom-in")}
-            onClick={onZoomIn}
-          />
-          <ActionTooltip active={hoveredItem === "zoom-in"}>
-            zoom in
-          </ActionTooltip>
+          <Button icon="zoom-in" onClick={onZoomIn} />
         </ActionBarItem>
         <ActionBarItem>
-          <Button
-            icon="zoom-out"
-            {...baseMouseHandler("zoom-out")}
-            onClick={onZoomOut}
-          />
-          <ActionTooltip active={hoveredItem === "zoom-out"}>
-            zoom out
-          </ActionTooltip>
+          <Button icon="zoom-out" onClick={onZoomOut} />
+        </ActionBarItem>
+        <ActionBarItem>
+          <Button icon="fullscreen" onClick={onFullscreen} />
         </ActionBarItem>
       </ul>
       {displayExportFileDialog && (

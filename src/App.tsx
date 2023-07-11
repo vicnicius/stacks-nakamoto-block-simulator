@@ -6,6 +6,7 @@ import {
   DimensionsContext,
   blockSpace,
   headerSize,
+  footerSize,
   marginSize,
 } from "./domain/Dimensions";
 import {
@@ -13,6 +14,7 @@ import {
   getInitialState,
 } from "./services/stateManagement";
 import { Canvas } from "./ui/components/canvas/Canvas";
+import { Footer } from "./ui/components/footer/Footer";
 import { Header } from "./ui/components/header/Header";
 
 export const App: FC = () => {
@@ -23,7 +25,7 @@ export const App: FC = () => {
   const [height, setHeight] = useState(
     // Canvas height is the window height minus the header height minus two times
     // the margin size for the page margins and one more for the canvas top margin.
-    window.innerHeight - headerSize - 3 * marginSize
+    window.innerHeight - headerSize - footerSize - 3 * marginSize
   );
   // Canvas width is the window width minus two times the margin size for
   // the page margins.
@@ -112,6 +114,7 @@ export const App: FC = () => {
           <UiStateContext.Provider value={{ state, dispatch }}>
             <Header />
             <Canvas />
+            <Footer />
           </UiStateContext.Provider>
         </DebugContext.Provider>
       </DimensionsContext.Provider>
