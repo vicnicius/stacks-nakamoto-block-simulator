@@ -1,5 +1,6 @@
 import { Line } from "@react-three/drei";
-import React, { FC, useContext } from "react";
+import React, { FC, useContext, useRef } from "react";
+import { LineSegments } from "three";
 import { BlockConnection } from "../../../../domain/BlockConnection";
 import {
   DimensionsContext,
@@ -14,6 +15,8 @@ export const Connections: FC<{
   connections: BlockConnection[];
   isHighlighted: boolean;
 }> = ({ connections, isHighlighted }) => {
+  const lineRef = useRef<LineSegments>(null);
+
   const { zoom } = useContext(DimensionsContext);
   const deltaY = cubeSize * Math.SQRT2;
   const points: [number, number, number][] = [];
@@ -81,5 +84,15 @@ export const Connections: FC<{
   });
   const lineWidth = isHighlighted ? 1.5 : 0.25;
   const color = isHighlighted ? colors.white : colors.gray;
-  return <Line points={points} segments color={color} lineWidth={lineWidth} />;
+  return (
+    <Line
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      ref={lineRef}
+      points={points}
+      segments
+      color={color}
+      lineWidth={lineWidth}
+    />
+  );
 };

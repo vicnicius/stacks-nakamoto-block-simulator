@@ -31,6 +31,8 @@ export interface StacksBlock extends CommonBlock<Chain.STX> {
   state: StacksBlockState;
 }
 
-export type BitcoinBlock = CommonBlock<Chain.BTC>;
+export interface BitcoinBlock extends CommonBlock<Chain.BTC> {
+  state: "final";
+}
 
 export type Block = StacksBlock | BitcoinBlock;

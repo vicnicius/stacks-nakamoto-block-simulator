@@ -1,3 +1,4 @@
+import { Material } from "three";
 import {
   Block,
   BlockPosition,
@@ -86,3 +87,5 @@ export function getConnections(
   connections.push(BlockConnection.TOP);
   return connections;
 }
+
+export const materialCache = new Map<string, Material | Material[]>();
