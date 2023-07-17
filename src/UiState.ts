@@ -116,6 +116,7 @@ function mineBlock(
         String(bitcoinParentId),
         state[Chain.BTC].blocks
       ),
+      state: "final",
     };
     const updatedBitcoinParentBlock: BitcoinBlock = {
       ...state[Chain.BTC].blocks[bitcoinParentId],
@@ -457,6 +458,7 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
       position: { vertical: 0, horizontal: 0 },
       isHighlighted: false,
       type: Chain.BTC,
+      state: "final",
       childrenIds: [],
     },
   },

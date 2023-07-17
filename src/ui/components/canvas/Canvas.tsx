@@ -1,4 +1,5 @@
 import {
+  Bvh,
   Environment,
   OrbitControls,
   PerformanceMonitor,
@@ -115,8 +116,10 @@ export const Canvas: FC = () => {
           >
             <Lights />
             <Camera isometric zoom={zoom} />
-            <BlockchainRender chain={stacks} ref={stacksRef} />
-            <BlockchainRender chain={bitcoin} ref={bitcoinRef} />
+            <Bvh>
+              <BlockchainRender chain={stacks} ref={stacksRef} />
+              <BlockchainRender chain={bitcoin} ref={bitcoinRef} />
+            </Bvh>
             <HUDScene />
             <GridHelper />
             <AxesHelper />
