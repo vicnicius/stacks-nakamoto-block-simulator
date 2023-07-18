@@ -7,12 +7,12 @@ export const colors = {
   white: "#FFFFFF",
   baseGray: "#121212",
   gray: "#999999",
-  darkYellow: "#E87F05",
+  darkYellow: "#AF6610",
   lightYellow: "#FFC540",
   lightGray: "#DDDDDD",
-  silver: "#E3FDFF",
-  lightBlue: "#0088FA",
-  darkPurple: "#4234E9",
+  silver: "#ADADAD",
+  lightBlue: "#0E678D",
+  darkPurple: "#291F9B",
   lightPurple: "#DCD9FA",
 };
 

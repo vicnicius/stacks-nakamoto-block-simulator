@@ -144,11 +144,8 @@ export const BlockRender: FC<{
         scale={springScale.scale}
         onPointerOver={handleCubeMouseEnter}
         onPointerOut={handleCubeMouseLeave}
-        {...(blockMaterial && { material: blockMaterial })}
       >
-        {!blockMaterial && (
-          <meshStandardMaterial color={getBlockColor(block)} />
-        )}
+        <meshStandardMaterial color={getBlockColor(block)} />
       </AnimatedBox>
       <Connections
         isHighlighted={block.isHighlighted}
