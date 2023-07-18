@@ -3,10 +3,10 @@ import React, { FC, useContext, useRef } from "react";
 import { LineSegments } from "three";
 import { BlockConnection } from "../../../../domain/BlockConnection";
 import {
-  DimensionsContext,
+  SceneContext,
   blockSpace,
   cubeSize,
-} from "../../../../domain/Dimensions";
+} from "../../../../domain/SceneContext";
 import { colors } from "../helpers";
 
 const cubeHorizontalDistance = blockSpace;
@@ -17,7 +17,7 @@ export const Connections: FC<{
 }> = ({ connections, isHighlighted }) => {
   const lineRef = useRef<LineSegments>(null);
 
-  const { zoom } = useContext(DimensionsContext);
+  const { zoom } = useContext(SceneContext);
   const deltaY = cubeSize * Math.SQRT2;
   const points: [number, number, number][] = [];
   connections.forEach((connection: BlockConnection, index: number) => {

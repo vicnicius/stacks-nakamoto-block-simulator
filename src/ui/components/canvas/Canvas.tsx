@@ -15,7 +15,7 @@ import React, {
 import { Group, MathUtils } from "three";
 import { UiStateContext } from "../../../UiState";
 import { DebugContext } from "../../../domain/Debug";
-import { DimensionsContext } from "../../../domain/Dimensions";
+import { SceneContext } from "../../../domain/SceneContext";
 import { BlockchainRender } from "./BlockchainRender";
 import { HUDScene } from "./HUDScene";
 import { AxesHelper } from "./components/AxesHelper";
@@ -78,7 +78,7 @@ export const Canvas: FC = () => {
   const bitcoinRef = useRef<Group>(null!);
   const [dpr, setDpr] = useState(1.5);
   const { height, width, maxYRightScroll, maxYLeftScroll, zoom } =
-    useContext(DimensionsContext);
+    useContext(SceneContext);
   const { state } = useContext(UiStateContext);
   const stacks = state.preview?.stacks || state.present.stacks;
   const bitcoin = state.preview?.bitcoin || state.present.bitcoin;

@@ -14,7 +14,7 @@ import { UiStateContext } from "../../../../UiState";
 import { Block, Chain, StacksBlockState } from "../../../../domain/Block";
 import { BlockActionType } from "../../../../domain/BlockAction";
 import { Blockchain } from "../../../../domain/Blockchain";
-import { DimensionsContext, cubeSize } from "../../../../domain/Dimensions";
+import { SceneContext, cubeSize } from "../../../../domain/SceneContext";
 import { Connections } from "./BlockConnections";
 import {
   getAnchorsFromPosition,
@@ -58,7 +58,7 @@ export const BlockRender: FC<{
   const edgesMaterialId = "edge";
   const edgesMaterial = materialCache.get(edgesMaterialId);
 
-  const { height, width, zoom } = useContext(DimensionsContext);
+  const { height, width, zoom } = useContext(SceneContext);
   const { dispatch } = useContext(UiStateContext);
   const [isHovering, setIsHovering] = useState(false);
   const hasChildren = block.childrenIds.length > 0;

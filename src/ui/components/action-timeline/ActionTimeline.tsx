@@ -4,7 +4,7 @@ import { reverse } from "lodash";
 import React, { FC, useCallback, useContext, useRef, useState } from "react";
 import { UiStateContext } from "../../../UiState";
 import { BlockActionType } from "../../../domain/BlockAction";
-import { DimensionsContext } from "../../../domain/Dimensions";
+import { SceneContext } from "../../../domain/SceneContext";
 import { TimeActionType } from "../../../domain/TimeAction";
 import { Icon } from "../icon/Icon";
 import "./ActionTimeline.css";
@@ -31,7 +31,7 @@ export const ActionTimeline: FC<{ visible: boolean; className?: string }> = ({
   const [highlightUpTo, setHighlightUpTo] = useState<number>(-1);
   const { dispatch } = useContext(UiStateContext);
   const container = useRef<HTMLDivElement>(null);
-  const { height } = useContext(DimensionsContext);
+  const { height } = useContext(SceneContext);
   const { maxHeight } = useSpring({ maxHeight: visible ? height : 0 });
   const {
     state: {

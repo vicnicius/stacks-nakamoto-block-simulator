@@ -1,6 +1,6 @@
 import { Html, Hud } from "@react-three/drei";
 import React, { FC, useContext } from "react";
-import { DimensionsContext } from "../../../domain/Dimensions";
+import { SceneContext } from "../../../domain/SceneContext";
 import { BulkActions } from "./components/BulkActions";
 import { Camera } from "./components/Camera";
 import { DividerLine } from "./components/DividerLine";
@@ -10,7 +10,7 @@ import { ReactComponent as StacksLogo } from "./resources/stacks-circle.svg";
 import "./HUDScene.css";
 
 export const HUDScene: FC = () => {
-  const { width, height } = useContext(DimensionsContext);
+  const { width, height } = useContext(SceneContext);
   const bulkActionPosition: [number, number, number] = [
     -width / 4,
     -height / 2 + layout.defaultMargin * 2,

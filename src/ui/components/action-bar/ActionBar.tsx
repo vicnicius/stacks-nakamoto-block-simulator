@@ -7,8 +7,8 @@ import React, {
   useState,
 } from "react";
 import { TimeAwareUiState, UiStateContext } from "../../../UiState";
-import { DimensionsContext } from "../../../domain/Dimensions";
 import { ImportAction } from "../../../domain/ImportAction";
+import { SceneContext } from "../../../domain/SceneContext";
 import { TimeActionType } from "../../../domain/TimeAction";
 import { parseFile } from "../../../services/stateManagement";
 import { Button } from "../button/Button";
@@ -25,7 +25,7 @@ export const ActionBar: FC<{
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [displayExportFileDialog, setDisplayExportFileDialog] = useState(false);
   const { dispatch, state } = useContext(UiStateContext);
-  const { zoom, setZoom } = useContext(DimensionsContext);
+  const { zoom, setZoom } = useContext(SceneContext);
   const canUndo = state.past.length > 0;
   const canRedo = state.future.length > 0;
   const onZoomIn = () => {

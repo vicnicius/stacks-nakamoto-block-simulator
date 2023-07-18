@@ -7,7 +7,7 @@ import {
 } from "../../../../domain/Block";
 import { BlockConnection } from "../../../../domain/BlockConnection";
 import { Blockchain } from "../../../../domain/Blockchain";
-import { blockSpace, cubeSize } from "../../../../domain/Dimensions";
+import { blockSpace, cubeSize } from "../../../../domain/SceneContext";
 import { colors } from "../helpers";
 
 function getIsometricCoordinates(

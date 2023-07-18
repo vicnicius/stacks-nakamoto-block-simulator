@@ -1,9 +1,9 @@
 import React, { useContext } from "react";
-import { DimensionsContext } from "../../../../domain/Dimensions";
+import { SceneContext } from "../../../../domain/SceneContext";
 import { colors } from "../helpers";
 
 export const Lights = () => {
-  const { width } = useContext(DimensionsContext);
+  const { width } = useContext(SceneContext);
   return (
     <>
       <spotLight

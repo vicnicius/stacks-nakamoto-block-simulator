@@ -17,7 +17,7 @@ export const isometricCameraAngle = new Euler(
   0
 );
 
-export const DimensionsContext = createContext<{
+export const SceneContext = createContext<{
   aspect: number;
   width: number;
   height: number;

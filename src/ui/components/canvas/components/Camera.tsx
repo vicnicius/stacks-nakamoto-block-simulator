@@ -1,7 +1,7 @@
 import { OrthographicCamera } from "@react-three/drei";
 import React, { FC, useEffect, useRef } from "react";
 import { OrthographicCamera as ThreeOrtographicCamera } from "three";
-import { isometricCameraAngle } from "../../../../domain/Dimensions";
+import { isometricCameraAngle } from "../../../../domain/SceneContext";
 
 export const Camera: FC<{
   isometric?: boolean;

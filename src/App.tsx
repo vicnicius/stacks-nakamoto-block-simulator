@@ -3,12 +3,12 @@ import "./App.css";
 import { UiStateContext, timeAwareReducer } from "./UiState";
 import { DebugContext } from "./domain/Debug";
 import {
-  DimensionsContext,
+  SceneContext,
   blockSpace,
   headerSize,
   footerSize,
   marginSize,
-} from "./domain/Dimensions";
+} from "./domain/SceneContext";
 import {
   defaultInitialState,
   getInitialState,
@@ -96,7 +96,7 @@ export const App: FC = () => {
 
   return (
     <main className="App">
-      <DimensionsContext.Provider
+      <SceneContext.Provider
         value={{
           blockSpace,
           width,
@@ -117,7 +117,7 @@ export const App: FC = () => {
             <Footer />
           </UiStateContext.Provider>
         </DebugContext.Provider>
-      </DimensionsContext.Provider>
+      </SceneContext.Provider>
     </main>
   );
 };

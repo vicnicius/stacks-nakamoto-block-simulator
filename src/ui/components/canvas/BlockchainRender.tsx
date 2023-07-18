@@ -9,7 +9,7 @@ import React, {
 import { Group } from "three";
 import { Chain } from "../../../domain/Block";
 import { Blockchain } from "../../../domain/Blockchain";
-import { DimensionsContext, blockSpace } from "../../../domain/Dimensions";
+import { SceneContext, blockSpace } from "../../../domain/SceneContext";
 import { BlockRender } from "./components/BlockRender";
 
 const BlockchainRenderCore: ForwardRefRenderFunction<
@@ -19,7 +19,7 @@ const BlockchainRenderCore: ForwardRefRenderFunction<
   }
 > = ({ chain }, ref) => {
   const { setMaxYLeftScroll, setMaxYRightScroll, height, zoom } =
-    useContext(DimensionsContext);
+    useContext(SceneContext);
   const blockIds = Object.keys(chain.blocks);
   const maxVerticalPosition = useMemo(() => {
     return blockIds.reduce((acc, id) => {
