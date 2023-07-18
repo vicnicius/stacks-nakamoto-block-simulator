@@ -28,13 +28,9 @@ async function digestUrlState(): Promise<TimeAwareUiState> {
     throw new Error("State not found in URL");
   }
   const parser = new JsonParser(parserCodec);
-  // eslint-disable-next-line no-console
-  console.log("Parsing state");
   const parsedState = JSON.parse(
     await parser.decompress(decodeURIComponent(stateParam))
   );
-  // eslint-disable-next-line no-console
-  console.log("Parsed state", parsedState);
   window.history.replaceState({}, "", window.location.pathname);
   return parsedState;
 }
