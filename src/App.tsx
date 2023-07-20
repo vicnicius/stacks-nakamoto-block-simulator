@@ -5,8 +5,8 @@ import { DebugContext } from "./domain/Debug";
 import {
   SceneContext,
   blockSpace,
-  headerSize,
   footerSize,
+  headerSize,
   marginSize,
 } from "./domain/SceneContext";
 import {
@@ -30,10 +30,6 @@ export const App: FC = () => {
   // Canvas width is the window width minus two times the margin size for
   // the page margins.
   const [width, setWidth] = useState(window.innerWidth - 2 * marginSize);
-  // The maxYLeftScroll sets the maximum amount of pixels that the user can scroll
-  const [maxYLeftScroll, setMaxYLeftScroll] = useState(9999);
-  // the maxYRightScroll sets the maximum amount of pixels that the user can scroll
-  const [maxYRightScroll, setMaxYRightScroll] = useState(9999);
 
   const aspect = width / height;
   useEffect(() => {
@@ -102,10 +98,6 @@ export const App: FC = () => {
           width,
           height,
           aspect,
-          maxYLeftScroll,
-          maxYRightScroll,
-          setMaxYLeftScroll,
-          setMaxYRightScroll,
           zoom,
           setZoom: handleSetZoom,
         }}

@@ -22,10 +22,6 @@ export const SceneContext = createContext<{
   width: number;
   height: number;
   blockSpace: number;
-  maxYLeftScroll: number;
-  maxYRightScroll: number;
-  setMaxYLeftScroll: (maxYLeftScroll: number) => void;
-  setMaxYRightScroll: (maxYRightScroll: number) => void;
   zoom: number;
   setZoom: (zoom: number) => void;
 }>({
@@ -33,10 +29,6 @@ export const SceneContext = createContext<{
   width: 1024,
   height: 768,
   blockSpace,
-  maxYLeftScroll: 9999,
-  maxYRightScroll: 9999,
   zoom: 1,
-  setMaxYRightScroll: noop,
-  setMaxYLeftScroll: noop,
   setZoom: noop,
 });

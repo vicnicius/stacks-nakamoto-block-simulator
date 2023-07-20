@@ -5,14 +5,7 @@ import {
   PerformanceMonitor,
 } from "@react-three/drei";
 import { Canvas as FiberCanvas } from "@react-three/fiber";
-import React, {
-  FC,
-  MutableRefObject,
-  useContext,
-  useRef,
-  useState,
-} from "react";
-import { Group, MathUtils } from "three";
+import React, { FC, useContext, useState } from "react";
 import { UiStateContext } from "../../../UiState";
 import { DebugContext } from "../../../domain/Debug";
 import { SceneContext } from "../../../domain/SceneContext";
@@ -25,60 +18,9 @@ import { Lights } from "./components/Lights";
 import { colors } from "./helpers";
 import "./Canvas.css";
 
-const handleScroll = ({
-  deltaY,
-  pageX,
-  width,
-  maxYLeftScroll,
-  maxYRightScroll,
-  nativeEvent,
-  leftRef,
-  rightRef,
-}: {
-  deltaY: number;
-  pageX: number;
-  width: number;
-  maxYLeftScroll: number;
-  maxYRightScroll: number;
-  nativeEvent: WheelEvent;
-  leftRef: MutableRefObject<Group>;
-  rightRef: MutableRefObject<Group>;
-}) => {
-  nativeEvent.preventDefault();
-  const newLeftTranslateY = deltaY + leftRef.current.position.y;
-  if (
-    pageX < width / 2 &&
-    newLeftTranslateY >= 0 &&
-    newLeftTranslateY < maxYLeftScroll
-  ) {
-    leftRef.current.position.y = MathUtils.lerp(
-      leftRef.current.position.y,
-      newLeftTranslateY,
-      0.1
-    );
-  }
-  const newRightTranslateY = deltaY + rightRef.current.position.y;
-  if (
-    pageX > width / 2 &&
-    newRightTranslateY >= 0 &&
-    newRightTranslateY < maxYRightScroll
-  ) {
-    rightRef.current.position.y = MathUtils.lerp(
-      rightRef.current.position.y,
-      newRightTranslateY,
-      0.1
-    );
-  }
-};
-
 export const Canvas: FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const stacksRef = useRef<Group>(null!);
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const bitcoinRef = useRef<Group>(null!);
   const [dpr, setDpr] = useState(1.5);
-  const { height, width, maxYRightScroll, maxYLeftScroll, zoom } =
-    useContext(SceneContext);
+  const { height, width, zoom } = useContext(SceneContext);
   const { state } = useContext(UiStateContext);
   const stacks = state.preview?.stacks || state.present.stacks;
   const bitcoin = state.preview?.bitcoin || state.present.bitcoin;
@@ -86,22 +28,7 @@ export const Canvas: FC = () => {
 
   return (
     <section className="CanvasWrapper">
-      <FiberCanvas
-        dpr={dpr}
-        style={{ height, width }}
-        onWheel={({ deltaY, pageX, nativeEvent }) =>
-          handleScroll({
-            deltaY,
-            pageX,
-            width,
-            maxYLeftScroll,
-            maxYRightScroll,
-            nativeEvent,
-            leftRef: stacksRef,
-            rightRef: bitcoinRef,
-          })
-        }
-      >
+      <FiberCanvas dpr={dpr} style={{ height, width }}>
         <PerformanceMonitor
           onChange={({ factor }) => setDpr(0.5 + 1.5 * factor)}
         >
@@ -117,8 +44,8 @@ export const Canvas: FC = () => {
             <Lights />
             <Camera isometric zoom={zoom} />
             <Bvh>
-              <BlockchainRender chain={stacks} ref={stacksRef} />
-              <BlockchainRender chain={bitcoin} ref={bitcoinRef} />
+              <BlockchainRender chain={stacks} />
+              <BlockchainRender chain={bitcoin} />
             </Bvh>
             <HUDScene />
             <GridHelper />

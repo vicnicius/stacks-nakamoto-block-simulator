@@ -16,6 +16,7 @@ import { BlockActionType } from "../../../../domain/BlockAction";
 import { Blockchain } from "../../../../domain/Blockchain";
 import { SceneContext, cubeSize } from "../../../../domain/SceneContext";
 import { Connections } from "./BlockConnections";
+import { ScrollContext } from "./ScrollContext";
 import {
   getAnchorsFromPosition,
   getBlockColor,
@@ -59,7 +60,8 @@ export const BlockRender: FC<{
   const edgesMaterial = materialCache.get(edgesMaterialId);
 
   const { height, width, zoom } = useContext(SceneContext);
-  const { dispatch } = useContext(UiStateContext);
+  const { automaticScrollToBlock } = useContext(ScrollContext);
+  const { dispatch, state } = useContext(UiStateContext);
   const [isHovering, setIsHovering] = useState(false);
   const hasChildren = block.childrenIds.length > 0;
 
@@ -81,6 +83,9 @@ export const BlockRender: FC<{
       targetBlockId: id,
       chain: chain.name,
     });
+    if (Object.keys(state.present[chain.name].blocks).length > 1) {
+      automaticScrollToBlock(state.present.stacks.blocks[id], chain.name);
+    }
   }, [dispatch, hasChildren]);
 
   useEffect(() => {
