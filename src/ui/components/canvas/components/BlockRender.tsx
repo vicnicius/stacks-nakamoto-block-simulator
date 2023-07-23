@@ -1,5 +1,5 @@
 import { animated, config, useSpring } from "@react-spring/three";
-import { Box } from "@react-three/drei";
+import { Billboard, Box, Edges, Html } from "@react-three/drei";
 import React, {
   FC,
   useCallback,
@@ -16,6 +16,7 @@ import { BlockActionType } from "../../../../domain/BlockAction";
 import { Blockchain } from "../../../../domain/Blockchain";
 import { SceneContext, cubeSize } from "../../../../domain/SceneContext";
 import { Connections } from "./BlockConnections";
+import { Info } from "./Info";
 import { ScrollContext } from "./ScrollContext";
 import {
   getAnchorsFromPosition,
@@ -26,6 +27,7 @@ import {
 
 const AnimatedGroup = animated.group;
 const AnimatedBox = animated(Box);
+const AnimatedEdges = animated(Edges);
 const boxGeometry = new BoxGeometry(cubeSize, cubeSize, cubeSize);
 
 function getCursor(isHovering: boolean, block: Block): string {
@@ -33,7 +35,7 @@ function getCursor(isHovering: boolean, block: Block): string {
     isHovering &&
     block.type === Chain.STX &&
     (block.state === StacksBlockState.NEW ||
-      block.state === StacksBlockState.BLESSED)
+      block.state === StacksBlockState.THAWED)
   ) {
     return "pointer";
   }
@@ -108,9 +110,8 @@ export const BlockRender: FC<{
     setHover(false);
   }, []);
   const springScale = useSpring({
-    from: { scale: 0 },
-    to: { scale: 1 },
-    config: config.gentle,
+    scale: isHovering ? 1.2 : 1,
+    config: { ...config.gentle, trail: 500 },
   });
   const outerCubeSpring = useSpring({
     rotation: isHovering
@@ -138,6 +139,8 @@ export const BlockRender: FC<{
         args={[cubeSize, cubeSize, cubeSize]}
         geometry={boxGeometry}
         ref={blockRef}
+        onPointerEnter={() => setIsHovering(true)}
+        onPointerLeave={() => setIsHovering(false)}
         // @FIXME: fix this type casting
         rotation={
           outerCubeSpring.rotation as unknown as [
@@ -151,7 +154,19 @@ export const BlockRender: FC<{
         onPointerOut={handleCubeMouseLeave}
       >
         <meshStandardMaterial color={getBlockColor(block)} />
+        <AnimatedEdges
+          scale={springScale.scale}
+          visible={isHovering}
+          color="white"
+        />
       </AnimatedBox>
+      {isHovering && (
+        <Billboard position={[cubeSize * 2, cubeSize * 2, 1]}>
+          <Html>
+            <Info block={block} id={id} />
+          </Html>
+        </Billboard>
+      )}
       <Connections
         isHighlighted={block.isHighlighted}
         connections={connections}

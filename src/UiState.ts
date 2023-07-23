@@ -226,7 +226,7 @@ function applyRules(
     if (
       depth > FROZEN_BLOCKS_DEPTH &&
       depth <= FINALIZED_BLOCKS_DEPTH &&
-      currentBlock.state !== StacksBlockState.BLESSED
+      currentBlock.state !== StacksBlockState.THAWED
     ) {
       chain.blocks[currentId].state = StacksBlockState.FROZEN;
       chain.blocks[currentId].childrenIds.forEach((childId) => {
@@ -236,7 +236,7 @@ function applyRules(
       });
     } else if (depth > FINALIZED_BLOCKS_DEPTH) {
       chain.blocks[currentId].state = StacksBlockState.FINALIZED;
-    } else if (currentBlock.state !== StacksBlockState.BLESSED) {
+    } else if (currentBlock.state !== StacksBlockState.THAWED) {
       chain.blocks[currentId].state = StacksBlockState.NEW;
     }
     depth = depth + 1;
@@ -260,7 +260,7 @@ function applyRules(
     chain.blocks[currentId].state = StacksBlockState.FINALIZED;
   } else if (
     currentBlock.parentId === undefined &&
-    currentBlock.state !== StacksBlockState.BLESSED
+    currentBlock.state !== StacksBlockState.THAWED
   ) {
     chain.blocks[currentId].state = StacksBlockState.NEW;
   }
@@ -283,7 +283,7 @@ function reducer(state: UiState, action: BlockAction): UiState {
     // @TODO: Refactor nested ifs
     if (
       state.stacks.blocks[blockId].state !== StacksBlockState.NEW &&
-      state.stacks.blocks[blockId].state !== StacksBlockState.BLESSED
+      state.stacks.blocks[blockId].state !== StacksBlockState.THAWED
     ) {
       throw new Error("Trying to mine unmineable block");
     }

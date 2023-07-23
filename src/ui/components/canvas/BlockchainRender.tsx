@@ -53,7 +53,7 @@ export const BlockchainRender: FC<{
 
   const automaticScrollToBlock = useCallback(
     (block: Block, chain: Chain) => {
-      if (!isScrollLocked) return;
+      if (!isScrollLocked || !block) return;
       const [, y] = getAnchorsFromPosition(
         block.position,
         width,
@@ -90,7 +90,7 @@ export const BlockchainRender: FC<{
         ref.current.position.y = newPositionY;
         y.current = newPositionY;
       }
-      if (newY + 10 >= maxScroll) {
+      if (newY + 100 >= maxScroll) {
         setIsScrollLocked(true);
       }
     },
@@ -98,7 +98,7 @@ export const BlockchainRender: FC<{
   );
 
   useEffect(() => {
-    if (chain.name === "bitcoin" && state.present.lastId > 2) {
+    if (state.present.lastId > 2) {
       automaticScrollToBlock(
         chain.blocks[state.present.lastId - 1],
         chain.name
