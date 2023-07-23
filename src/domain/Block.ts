@@ -29,6 +29,8 @@ export enum StacksBlockState {
 
 export interface StacksBlock extends CommonBlock<Chain.STX> {
   state: StacksBlockState;
+  // The id of the block it was mined in.
+  bitcoinBlockId: string;
 }
 
 export interface BitcoinBlock extends CommonBlock<Chain.BTC> {

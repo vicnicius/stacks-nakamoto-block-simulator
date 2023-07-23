@@ -89,23 +89,7 @@ function mineBlock(
   state: UiState
 ): { bitcoin: Blockchain<Chain.BTC>; stacks: Blockchain<Chain.STX> } {
   if (targetChain === Chain.STX) {
-    const newStacksBlockAttributes: StacksBlock = {
-      type: targetChain,
-      childrenIds: [],
-      isHighlighted: false,
-      parentId: targetBlockId,
-      position: getNewPosition(targetBlockId, state[targetChain].blocks),
-      state: StacksBlockState.NEW,
-    };
-    const updatedStacksParentBlock: StacksBlock = {
-      ...state[targetChain].blocks[targetBlockId],
-      childrenIds: [
-        ...state[targetChain].blocks[targetBlockId].childrenIds,
-        String(newBlockId),
-      ],
-    };
-
-    // When mining stacks we don't want to fork the bitcoin side, so the target is always the tip of the chain
+    // When mining stacks we always do it on a new block of the canonical fork
     const bitcoinParentId = String(newBlockId - 1);
     const newBitcoinBlockAttributes: BitcoinBlock = {
       type: Chain.BTC,
@@ -122,6 +106,23 @@ function mineBlock(
       ...state[Chain.BTC].blocks[bitcoinParentId],
       childrenIds: [
         ...state[Chain.BTC].blocks[bitcoinParentId].childrenIds,
+        String(newBlockId),
+      ],
+    };
+
+    const newStacksBlockAttributes: StacksBlock = {
+      type: targetChain,
+      bitcoinBlockId: String(newBlockId),
+      childrenIds: [],
+      isHighlighted: false,
+      parentId: targetBlockId,
+      position: getNewPosition(targetBlockId, state[targetChain].blocks),
+      state: StacksBlockState.NEW,
+    };
+    const updatedStacksParentBlock: StacksBlock = {
+      ...state[targetChain].blocks[targetBlockId],
+      childrenIds: [
+        ...state[targetChain].blocks[targetBlockId].childrenIds,
         String(newBlockId),
       ],
     };
@@ -441,6 +442,7 @@ export const initialStacksChain: Blockchain<Chain.STX> = {
   actions: [],
   blocks: {
     1: {
+      bitcoinBlockId: "1",
       position: { vertical: 0, horizontal: 0 },
       childrenIds: [],
       isHighlighted: false,
