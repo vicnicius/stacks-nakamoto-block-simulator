@@ -1,6 +1,15 @@
 import React, { FC } from "react";
-import { Block, StacksBlockState } from "../../../../domain/Block";
+import {
+  Block,
+  StacksBlockState,
+  isStacksBlock,
+} from "../../../../domain/Block";
 import "./Info.css";
+
+interface InfoProps {
+  block: Block;
+  id: string;
+}
 
 function getInfoForBlockState(state: string): React.ReactNode {
   if (state === StacksBlockState.NEW) {
@@ -14,8 +23,9 @@ function getInfoForBlockState(state: string): React.ReactNode {
   return null;
 }
 
-export const Info: FC<{ block: Block; id: string }> = ({ block, id }) => {
+export const Info: FC<InfoProps> = ({ block, id }) => {
   const info = getInfoForBlockState(block.state);
+  const isStacks = isStacksBlock(block);
   return (
     <div className="InfoWrapper">
       <div className="InfoGroup">
@@ -26,6 +36,18 @@ export const Info: FC<{ block: Block; id: string }> = ({ block, id }) => {
         <p className="InfoLine">State:</p>
         <p className="InfoDescription">{block.state}</p>
       </div>
+      {isStacks && (
+        <div className="InfoGroup">
+          <p className="InfoLine">Bitcoin confirmations:</p>
+          <p className="InfoDescription">{block.bitcoinConfirmations}</p>
+        </div>
+      )}
+      {isStacks && (
+        <div className="InfoGroup">
+          <p className="InfoLine">Stacks confirmations:</p>
+          <p className="InfoDescription">{block.stacksConfirmations}</p>
+        </div>
+      )}
       {info && (
         <div className="InfoGroup">
           <p className="InfoLine">Info:</p>

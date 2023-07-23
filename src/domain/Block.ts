@@ -31,6 +31,8 @@ export interface StacksBlock extends CommonBlock<Chain.STX> {
   state: StacksBlockState;
   // The id of the block it was mined in.
   bitcoinBlockId: string;
+  bitcoinConfirmations: number;
+  stacksConfirmations: number;
 }
 
 export interface BitcoinBlock extends CommonBlock<Chain.BTC> {
@@ -38,3 +40,7 @@ export interface BitcoinBlock extends CommonBlock<Chain.BTC> {
 }
 
 export type Block = StacksBlock | BitcoinBlock;
+
+export function isStacksBlock(block: Block): block is StacksBlock {
+  return block.type === Chain.STX;
+}

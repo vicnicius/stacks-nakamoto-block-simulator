@@ -30,7 +30,6 @@ export interface UiState {
   [Chain.STX]: Blockchain<Chain.STX>;
   actions: BlockAction[];
   lastId: number;
-  longestChainStartId: string;
 }
 
 function getNewPosition(
@@ -109,14 +108,20 @@ function mineBlock(
         String(newBlockId),
       ],
     };
-
+    const newPosition = getNewPosition(
+      targetBlockId,
+      state[targetChain].blocks
+    );
     const newStacksBlockAttributes: StacksBlock = {
       type: targetChain,
       bitcoinBlockId: String(newBlockId),
       childrenIds: [],
       isHighlighted: false,
       parentId: targetBlockId,
-      position: getNewPosition(targetBlockId, state[targetChain].blocks),
+      // @todo: implement
+      bitcoinConfirmations: 1,
+      stacksConfirmations: 1,
+      position: newPosition,
       state: StacksBlockState.NEW,
     };
     const updatedStacksParentBlock: StacksBlock = {
@@ -132,8 +137,8 @@ function mineBlock(
         ...state.bitcoin,
         blocks: {
           ...state.bitcoin.blocks,
-          [newBlockId]: newBitcoinBlockAttributes,
           [bitcoinParentId]: updatedBitcoinParentBlock,
+          [newBlockId]: newBitcoinBlockAttributes,
         },
       },
       stacks: {
@@ -276,13 +281,10 @@ function reducer(state: UiState, action: BlockAction): UiState {
   const { chain, type, targetBlockId } = action;
 
   // Mining Stacks blocks
-  if (
-    (type === BlockActionType.MINE || type === BlockActionType.FORK) &&
-    chain === Chain.STX
-  ) {
-    const blockId = targetBlockId ?? state.longestChainStartId;
-    // @TODO: Refactor nested ifs
+  if (type === BlockActionType.MINE || type === BlockActionType.FORK) {
+    const blockId = targetBlockId ?? state[chain].longestChainStartId;
     if (
+      chain === Chain.STX &&
       state.stacks.blocks[blockId].state !== StacksBlockState.NEW &&
       state.stacks.blocks[blockId].state !== StacksBlockState.THAWED
     ) {
@@ -300,22 +302,21 @@ function reducer(state: UiState, action: BlockAction): UiState {
     const stacks = applyRules(updatedStacksChain, longestChainStartId);
 
     return {
-      stacks,
+      stacks: { ...stacks, longestChainStartId },
       bitcoin,
       actions: [
         ...state.actions,
         {
           ...action,
-          targetBlockId: targetBlockId ?? state.longestChainStartId,
+          targetBlockId: targetBlockId ?? state[chain].longestChainStartId,
         },
       ],
-      longestChainStartId: getLongestChainStartId(stacks),
       lastId: nextId,
     };
   }
 
   if (isHoverAction(action) && chain === Chain.STX) {
-    const blockId = targetBlockId ?? state.longestChainStartId;
+    const blockId = targetBlockId ?? state.stacks.longestChainStartId;
     // @TODO: Refactor nested ifs
     if (!blockId) {
       throw new Error("Trying to hover invalid block");
@@ -332,7 +333,7 @@ function reducer(state: UiState, action: BlockAction): UiState {
   }
 
   if (isHoverAction(action) && chain === Chain.BTC) {
-    const blockId = targetBlockId ?? state.longestChainStartId;
+    const blockId = targetBlockId ?? state.bitcoin.longestChainStartId;
     // @TODO: Refactor nested ifs
     if (!blockId) {
       throw new Error("Trying to hover invalid block");
@@ -393,7 +394,7 @@ export function timeAwareReducer(
   ) {
     const stacks = applyRules(
       present.stacks,
-      present.longestChainStartId,
+      present.stacks.longestChainStartId,
       true
     );
     return {
@@ -412,7 +413,7 @@ export function timeAwareReducer(
     const preview = past[action.targetActionIndex + 1] ?? present;
     const stacks = applyRules(
       preview.stacks,
-      preview.longestChainStartId,
+      preview.stacks.longestChainStartId,
       true
     );
     return {
@@ -443,6 +444,8 @@ export const initialStacksChain: Blockchain<Chain.STX> = {
   blocks: {
     1: {
       bitcoinBlockId: "1",
+      bitcoinConfirmations: 1,
+      stacksConfirmations: 1,
       position: { vertical: 0, horizontal: 0 },
       childrenIds: [],
       isHighlighted: false,
@@ -450,6 +453,7 @@ export const initialStacksChain: Blockchain<Chain.STX> = {
       state: StacksBlockState.NEW,
     },
   },
+  longestChainStartId: "1",
 };
 
 export const initialBitcoinChain: Blockchain<Chain.BTC> = {
@@ -464,6 +468,7 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
       childrenIds: [],
     },
   },
+  longestChainStartId: "1",
 };
 
 export const UiStateContext = createContext<{
@@ -477,7 +482,6 @@ export const UiStateContext = createContext<{
       stacks: initialStacksChain,
       actions: [],
       lastId: 1,
-      longestChainStartId: "1",
     },
     future: [],
   },

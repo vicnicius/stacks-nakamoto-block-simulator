@@ -85,6 +85,7 @@ export const BlockRender: FC<{
       targetBlockId: id,
       chain: chain.name,
     });
+    setIsHovering(false);
     if (Object.keys(state.present[chain.name].blocks).length > 1) {
       automaticScrollToBlock(state.present.stacks.blocks[id], chain.name);
     }
@@ -161,7 +162,7 @@ export const BlockRender: FC<{
         />
       </AnimatedBox>
       {isHovering && (
-        <Billboard position={[cubeSize * 2, cubeSize * 2, 1]}>
+        <Billboard position={[cubeSize * 2, cubeSize * 3, 1]}>
           <Html>
             <Info block={block} id={id} />
           </Html>

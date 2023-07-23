@@ -7,4 +7,5 @@ export interface Blockchain<T extends Chain> {
     [id: string]: T extends Chain.STX ? StacksBlock : BitcoinBlock;
   };
   actions: T extends Chain.STX ? BlockAction[] : [];
+  longestChainStartId: string;
 }
