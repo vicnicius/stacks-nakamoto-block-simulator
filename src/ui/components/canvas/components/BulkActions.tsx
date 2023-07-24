@@ -20,24 +20,35 @@ export const BulkActions: FC<BulkActionsProps> = ({ position }) => {
     });
   };
 
-  const handleMineSixClick = () => {
-    range(0, 6).forEach(() => {
-      dispatch({
-        type: BlockActionType.MINE,
-        // Hardcoded while we only allow mining on STX
-        chain: Chain.STX,
-      });
+  const waitAndDispatch = (waitTime: number): Promise<void> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        dispatch({
+          type: BlockActionType.MINE,
+          // Hardcoded while we only allow mining on STX
+          chain: Chain.STX,
+        });
+        resolve();
+      }, waitTime);
     });
   };
 
+  const handleMineSixClick = () => {
+    Promise.all(
+      range(0, 6).map(async (value) => {
+        await waitAndDispatch(value * 200);
+      })
+      // eslint-disable-next-line no-console
+    ).catch(console.error);
+  };
+
   const handleMineOneHundredClick = () => {
-    range(0, 100).forEach(() => {
-      dispatch({
-        type: BlockActionType.MINE,
-        // Hardcoded while we only allow mining on STX
-        chain: Chain.STX,
-      });
-    });
+    Promise.all(
+      range(0, 100).map(async (value) => {
+        await waitAndDispatch(value * 200);
+      })
+      // eslint-disable-next-line no-console
+    ).catch(console.error);
   };
   return (
     <Html position={position}>

@@ -135,7 +135,10 @@ function mineBlock(
     let parentId = newStacksBlockAttributes.parentId;
     while (parentId !== undefined) {
       confirmations = confirmations + 1;
-      state[targetChain].blocks[parentId].stacksConfirmations = confirmations;
+      state[targetChain].blocks[parentId] = {
+        ...state[targetChain].blocks[parentId],
+        stacksConfirmations: confirmations,
+      };
       parentId = state[targetChain].blocks[parentId].parentId;
     }
 
