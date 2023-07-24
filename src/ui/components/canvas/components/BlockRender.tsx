@@ -87,7 +87,7 @@ export const BlockRender: FC<{
     });
     setIsHovering(false);
     if (Object.keys(state.present[chain.name].blocks).length > 1) {
-      automaticScrollToBlock(state.present.stacks.blocks[id], chain.name);
+      automaticScrollToBlock(state.present[chain.name].blocks[id], chain.name);
     }
   }, [dispatch, hasChildren]);
 

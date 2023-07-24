@@ -89,7 +89,8 @@ function mineBlock(
 ): { bitcoin: Blockchain<Chain.BTC>; stacks: Blockchain<Chain.STX> } {
   if (targetChain === Chain.STX) {
     // When mining stacks we always do it on a new block of the canonical fork
-    const bitcoinParentId = String(newBlockId - 1);
+    const bitcoinParentId = state.bitcoin.longestChainStartId;
+    let confirmations = 1;
     const newBitcoinBlockAttributes: BitcoinBlock = {
       type: Chain.BTC,
       childrenIds: [],
@@ -99,7 +100,7 @@ function mineBlock(
         String(bitcoinParentId),
         state[Chain.BTC].blocks
       ),
-      state: "final",
+      state: "Final",
     };
     const updatedBitcoinParentBlock: BitcoinBlock = {
       ...state[Chain.BTC].blocks[bitcoinParentId],
@@ -118,9 +119,8 @@ function mineBlock(
       childrenIds: [],
       isHighlighted: false,
       parentId: targetBlockId,
-      // @todo: implement
       bitcoinConfirmations: 1,
-      stacksConfirmations: 1,
+      stacksConfirmations: confirmations,
       position: newPosition,
       state: StacksBlockState.NEW,
     };
@@ -131,6 +131,13 @@ function mineBlock(
         String(newBlockId),
       ],
     };
+
+    let parentId = newStacksBlockAttributes.parentId;
+    while (parentId !== undefined) {
+      confirmations = confirmations + 1;
+      state[targetChain].blocks[parentId].stacksConfirmations = confirmations;
+      parentId = state[targetChain].blocks[parentId].parentId;
+    }
 
     return {
       bitcoin: {
@@ -298,12 +305,13 @@ function reducer(state: UiState, action: BlockAction): UiState {
       chain,
       state
     );
-    const longestChainStartId = getLongestChainStartId(updatedStacksChain);
-    const stacks = applyRules(updatedStacksChain, longestChainStartId);
+    const longestStacksTipId = getLongestChainStartId(updatedStacksChain);
+    const longestBitcoinTipId = getLongestChainStartId(bitcoin);
+    const stacks = applyRules(updatedStacksChain, longestStacksTipId);
 
     return {
-      stacks: { ...stacks, longestChainStartId },
-      bitcoin,
+      stacks: { ...stacks, longestChainStartId: longestStacksTipId },
+      bitcoin: { ...bitcoin, longestChainStartId: longestBitcoinTipId },
       actions: [
         ...state.actions,
         {
@@ -464,7 +472,7 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
       position: { vertical: 0, horizontal: 0 },
       isHighlighted: false,
       type: Chain.BTC,
-      state: "final",
+      state: "Final",
       childrenIds: [],
     },
   },
