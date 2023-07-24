@@ -45,7 +45,7 @@ export const BulkActions: FC<BulkActionsProps> = ({ position }) => {
   const handleMineOneHundredClick = () => {
     Promise.all(
       range(0, 100).map(async (value) => {
-        await waitAndDispatch(value * 200);
+        await waitAndDispatch(value * 100);
       })
       // eslint-disable-next-line no-console
     ).catch(console.error);
