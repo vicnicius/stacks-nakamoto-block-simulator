@@ -11,7 +11,12 @@ import React, {
 } from "react";
 import { BoxGeometry, LineSegments, Mesh } from "three";
 import { UiStateContext } from "../../../../UiState";
-import { Block, Chain, StacksBlockState } from "../../../../domain/Block";
+import {
+  Block,
+  Chain,
+  StacksBlockState,
+  isStacksBlock,
+} from "../../../../domain/Block";
 import { BlockActionType } from "../../../../domain/BlockAction";
 import { Blockchain } from "../../../../domain/Blockchain";
 import { SceneContext, cubeSize } from "../../../../domain/SceneContext";
@@ -33,9 +38,9 @@ const boxGeometry = new BoxGeometry(cubeSize, cubeSize, cubeSize);
 function getCursor(isHovering: boolean, block: Block): string {
   if (
     isHovering &&
-    block.type === Chain.STX &&
     (block.state === StacksBlockState.NEW ||
-      block.state === StacksBlockState.THAWED)
+      block.state === StacksBlockState.THAWED ||
+      block.state === "Final")
   ) {
     return "pointer";
   }
@@ -164,7 +169,15 @@ export const BlockRender: FC<{
       {isHovering && (
         <Billboard position={[cubeSize * 2, cubeSize * 3, 1]}>
           <Html>
-            <Info block={block} id={id} />
+            <Info
+              block={block}
+              bitcoinBlock={
+                isStacksBlock(block)
+                  ? state.present.bitcoin.blocks[block.bitcoinBlockId]
+                  : undefined
+              }
+              id={id}
+            />
           </Html>
         </Billboard>
       )}

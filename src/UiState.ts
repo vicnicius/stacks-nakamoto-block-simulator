@@ -95,6 +95,7 @@ function mineBlock(
       type: Chain.BTC,
       childrenIds: [],
       isHighlighted: false,
+      confirmations,
       parentId: bitcoinParentId,
       position: getNewPosition(
         String(bitcoinParentId),
@@ -119,8 +120,7 @@ function mineBlock(
       childrenIds: [],
       isHighlighted: false,
       parentId: targetBlockId,
-      bitcoinConfirmations: 1,
-      stacksConfirmations: confirmations,
+      confirmations: confirmations,
       position: newPosition,
       state: StacksBlockState.NEW,
     };
@@ -137,9 +137,20 @@ function mineBlock(
       confirmations = confirmations + 1;
       state[targetChain].blocks[parentId] = {
         ...state[targetChain].blocks[parentId],
-        stacksConfirmations: confirmations,
+        confirmations: confirmations,
       };
       parentId = state[targetChain].blocks[parentId].parentId;
+    }
+
+    let tmpBitcoinParentId = newBitcoinBlockAttributes.parentId;
+    let bitcoinConfirmations = 1;
+    while (tmpBitcoinParentId !== undefined) {
+      bitcoinConfirmations = bitcoinConfirmations + 1;
+      state.bitcoin.blocks[tmpBitcoinParentId] = {
+        ...state.bitcoin.blocks[tmpBitcoinParentId],
+        confirmations: bitcoinConfirmations,
+      };
+      tmpBitcoinParentId = state.bitcoin.blocks[tmpBitcoinParentId].parentId;
     }
 
     return {
@@ -163,6 +174,47 @@ function mineBlock(
   }
 
   if (targetChain === Chain.BTC) {
+    // When mining stacks we always do it on a new block of the canonical fork
+    let confirmations = 1;
+    const newBitcoinBlockAttributes: BitcoinBlock = {
+      type: Chain.BTC,
+      childrenIds: [],
+      confirmations,
+      isHighlighted: false,
+      parentId: targetBlockId,
+      position: getNewPosition(String(targetBlockId), state[Chain.BTC].blocks),
+      state: "Final",
+    };
+    const updatedBitcoinParentBlock: BitcoinBlock = {
+      ...state[Chain.BTC].blocks[targetBlockId],
+      childrenIds: [
+        ...state[Chain.BTC].blocks[targetBlockId].childrenIds,
+        String(newBlockId),
+      ],
+    };
+
+    let parentId = newBitcoinBlockAttributes.parentId;
+    while (parentId !== undefined) {
+      confirmations = confirmations + 1;
+      state[targetChain].blocks[parentId] = {
+        ...state[targetChain].blocks[parentId],
+        confirmations: confirmations,
+      };
+      parentId = state[targetChain].blocks[parentId].parentId;
+    }
+
+    return {
+      bitcoin: {
+        ...state.bitcoin,
+        blocks: {
+          ...state.bitcoin.blocks,
+          [targetBlockId]: updatedBitcoinParentBlock,
+          [newBlockId]: newBitcoinBlockAttributes,
+        },
+      },
+      stacks: state.stacks,
+    };
+
     return { stacks: state.stacks, bitcoin: state.bitcoin };
   }
 
@@ -455,8 +507,7 @@ export const initialStacksChain: Blockchain<Chain.STX> = {
   blocks: {
     1: {
       bitcoinBlockId: "1",
-      bitcoinConfirmations: 1,
-      stacksConfirmations: 1,
+      confirmations: 1,
       position: { vertical: 0, horizontal: 0 },
       childrenIds: [],
       isHighlighted: false,
@@ -473,6 +524,7 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
   blocks: {
     1: {
       position: { vertical: 0, horizontal: 0 },
+      confirmations: 1,
       isHighlighted: false,
       type: Chain.BTC,
       state: "Final",

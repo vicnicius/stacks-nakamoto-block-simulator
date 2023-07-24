@@ -7,6 +7,7 @@ import {
 import "./Info.css";
 
 interface InfoProps {
+  bitcoinBlock?: Block;
   block: Block;
   id: string;
 }
@@ -23,7 +24,7 @@ function getInfoForBlockState(state: string): React.ReactNode {
   return null;
 }
 
-export const Info: FC<InfoProps> = ({ block, id }) => {
+export const Info: FC<InfoProps> = ({ block, bitcoinBlock, id }) => {
   const info = getInfoForBlockState(block.state);
   const isStacks = isStacksBlock(block);
   return (
@@ -36,18 +37,18 @@ export const Info: FC<InfoProps> = ({ block, id }) => {
         <p className="InfoLine">State:</p>
         <p className="InfoDescription">{block.state}</p>
       </div>
-      {isStacks && (
+      {bitcoinBlock && (
         <div className="InfoGroup">
           <p className="InfoLine">Bitcoin confirmations:</p>
-          <p className="InfoDescription">{block.bitcoinConfirmations}</p>
+          <p className="InfoDescription">{bitcoinBlock.confirmations}</p>
         </div>
       )}
-      {isStacks && (
-        <div className="InfoGroup">
-          <p className="InfoLine">Stacks confirmations:</p>
-          <p className="InfoDescription">{block.stacksConfirmations}</p>
-        </div>
-      )}
+      <div className="InfoGroup">
+        <p className="InfoLine">
+          {isStacks ? "Stacks Confirmations" : "Confirmations"}
+        </p>
+        <p className="InfoDescription">{block.confirmations}</p>
+      </div>
       {info && (
         <div className="InfoGroup">
           <p className="InfoLine">Info:</p>

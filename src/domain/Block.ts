@@ -31,11 +31,11 @@ export interface StacksBlock extends CommonBlock<Chain.STX> {
   state: StacksBlockState;
   // The id of the block it was mined in.
   bitcoinBlockId: string;
-  bitcoinConfirmations: number;
-  stacksConfirmations: number;
+  confirmations: number;
 }
 
 export interface BitcoinBlock extends CommonBlock<Chain.BTC> {
+  confirmations: number;
   state: "Final";
 }
 
