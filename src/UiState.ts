@@ -15,8 +15,8 @@ import { Blockchain } from "./domain/Blockchain";
 import { ImportAction, isImportAction } from "./domain/ImportAction";
 import { TimeAction, TimeActionType, isTimeAction } from "./domain/TimeAction";
 
-const FINALIZED_BLOCKS_DEPTH = 100;
-const FROZEN_BLOCKS_DEPTH = 6;
+const FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS = 100;
+const FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS = 6;
 
 export interface TimeAwareUiState {
   past: UiState[];
@@ -280,61 +280,68 @@ function freezeChildren(chain: Blockchain<Chain.STX>, id: string) {
 }
 
 function applyRules(
-  chain: Blockchain<Chain.STX>,
+  stacksChain: Blockchain<Chain.STX>,
+  bitcoinChain: Blockchain<Chain.BTC>,
   startId: string,
   resetHighlight = false
 ): Blockchain<Chain.STX> {
-  let depth = 1;
   let previousId: undefined | string = undefined;
   let currentId = startId;
-  let currentBlock = chain.blocks[startId];
+  let currentBlock = stacksChain.blocks[startId];
+  const confirmedBitcoinBlock =
+    bitcoinChain.blocks[currentBlock.bitcoinBlockId];
   while (currentBlock.parentId !== undefined) {
     if (
-      depth > FROZEN_BLOCKS_DEPTH &&
-      depth <= FINALIZED_BLOCKS_DEPTH &&
+      currentBlock.confirmations > FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
+      confirmedBitcoinBlock.confirmations <=
+        FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS &&
       currentBlock.state !== StacksBlockState.THAWED
     ) {
-      chain.blocks[currentId].state = StacksBlockState.FROZEN;
-      chain.blocks[currentId].childrenIds.forEach((childId) => {
+      stacksChain.blocks[currentId].state = StacksBlockState.FROZEN;
+      stacksChain.blocks[currentId].childrenIds.forEach((childId) => {
         if (previousId !== undefined && childId !== previousId) {
-          freezeChildren(chain, childId);
+          freezeChildren(stacksChain, childId);
         }
       });
-    } else if (depth > FINALIZED_BLOCKS_DEPTH) {
-      chain.blocks[currentId].state = StacksBlockState.FINALIZED;
+    } else if (
+      confirmedBitcoinBlock.confirmations >
+      FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
+    ) {
+      stacksChain.blocks[currentId].state = StacksBlockState.FINALIZED;
     } else if (currentBlock.state !== StacksBlockState.THAWED) {
-      chain.blocks[currentId].state = StacksBlockState.NEW;
+      stacksChain.blocks[currentId].state = StacksBlockState.NEW;
     }
-    depth = depth + 1;
     previousId = currentId;
     currentId = currentBlock.parentId;
-    currentBlock = chain.blocks[currentBlock.parentId];
+    currentBlock = stacksChain.blocks[currentBlock.parentId];
     if (resetHighlight) {
       currentBlock.isHighlighted = false;
     }
   }
   if (
     currentBlock.parentId === undefined &&
-    depth > FROZEN_BLOCKS_DEPTH &&
-    depth <= FINALIZED_BLOCKS_DEPTH
+    currentBlock.confirmations > FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
+    confirmedBitcoinBlock.confirmations <=
+      FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
   ) {
-    chain.blocks[currentId].state = StacksBlockState.FROZEN;
+    stacksChain.blocks[currentId].state = StacksBlockState.FROZEN;
   } else if (
     currentBlock.parentId === undefined &&
-    depth > FINALIZED_BLOCKS_DEPTH
+    confirmedBitcoinBlock.confirmations >
+      FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
   ) {
-    chain.blocks[currentId].state = StacksBlockState.FINALIZED;
+    stacksChain.blocks[currentId].state = StacksBlockState.FINALIZED;
   } else if (
     currentBlock.parentId === undefined &&
     currentBlock.state !== StacksBlockState.THAWED
   ) {
-    chain.blocks[currentId].state = StacksBlockState.NEW;
+    stacksChain.blocks[currentId].state = StacksBlockState.NEW;
   }
   if (resetHighlight) {
-    chain.blocks[currentId].isHighlighted = false;
+    stacksChain.blocks[currentId].isHighlighted = false;
   }
 
-  return { ...chain };
+  return { ...stacksChain };
 }
 
 function reducer(state: UiState, action: BlockAction): UiState {
@@ -360,7 +367,7 @@ function reducer(state: UiState, action: BlockAction): UiState {
     );
     const longestStacksTipId = getLongestChainStartId(updatedStacksChain);
     const longestBitcoinTipId = getLongestChainStartId(bitcoin);
-    const stacks = applyRules(updatedStacksChain, longestStacksTipId);
+    const stacks = applyRules(updatedStacksChain, bitcoin, longestStacksTipId);
 
     return {
       stacks: { ...stacks, longestChainStartId: longestStacksTipId },
@@ -455,6 +462,7 @@ export function timeAwareReducer(
   ) {
     const stacks = applyRules(
       present.stacks,
+      present.bitcoin,
       present.stacks.longestChainStartId,
       true
     );
@@ -474,6 +482,7 @@ export function timeAwareReducer(
     const preview = past[action.targetActionIndex + 1] ?? present;
     const stacks = applyRules(
       preview.stacks,
+      preview.bitcoin,
       preview.stacks.longestChainStartId,
       true
     );
