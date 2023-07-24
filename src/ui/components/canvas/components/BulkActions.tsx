@@ -8,15 +8,15 @@ import "./BulkActions.css";
 
 interface BulkActionsProps {
   position: [x: number, y: number, z: number];
+  chain: Chain;
 }
 
-export const BulkActions: FC<BulkActionsProps> = ({ position }) => {
+export const BulkActions: FC<BulkActionsProps> = ({ position, chain }) => {
   const { dispatch } = useContext(UiStateContext);
   const handleMineClick = () => {
     dispatch({
       type: BlockActionType.MINE,
-      // Hardcoded while we only allow mining on STX
-      chain: Chain.STX,
+      chain,
     });
   };
 
@@ -25,8 +25,7 @@ export const BulkActions: FC<BulkActionsProps> = ({ position }) => {
       setTimeout(() => {
         dispatch({
           type: BlockActionType.MINE,
-          // Hardcoded while we only allow mining on STX
-          chain: Chain.STX,
+          chain,
         });
         resolve();
       }, waitTime);

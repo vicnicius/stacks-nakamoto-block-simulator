@@ -214,8 +214,6 @@ function mineBlock(
       },
       stacks: state.stacks,
     };
-
-    return { stacks: state.stacks, bitcoin: state.bitcoin };
   }
 
   return { stacks: state.stacks, bitcoin: state.bitcoin };

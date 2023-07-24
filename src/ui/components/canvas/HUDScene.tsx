@@ -1,18 +1,24 @@
 import { Html, Hud } from "@react-three/drei";
 import React, { FC, useContext } from "react";
+import { Chain } from "../../../domain/Block";
 import { SceneContext } from "../../../domain/SceneContext";
+import "./HUDScene.css";
 import { BulkActions } from "./components/BulkActions";
 import { Camera } from "./components/Camera";
 import { DividerLine } from "./components/DividerLine";
 import { layout } from "./helpers";
 import { ReactComponent as BitcoinLogo } from "./resources/bitcoin-circle.svg";
 import { ReactComponent as StacksLogo } from "./resources/stacks-circle.svg";
-import "./HUDScene.css";
 
 export const HUDScene: FC = () => {
   const { width, height } = useContext(SceneContext);
-  const bulkActionPosition: [number, number, number] = [
+  const stacksBulkActionsPosition: [number, number, number] = [
     -width / 4,
+    -height / 2 + layout.defaultMargin * 2,
+    0,
+  ];
+  const bitcoinBulkActionsPosition: [number, number, number] = [
+    width / 4,
     -height / 2 + layout.defaultMargin * 2,
     0,
   ];
@@ -32,7 +38,8 @@ export const HUDScene: FC = () => {
         </div>
       </Html>
       <DividerLine />
-      <BulkActions position={bulkActionPosition} />
+      <BulkActions position={stacksBulkActionsPosition} chain={Chain.STX} />
+      <BulkActions position={bitcoinBulkActionsPosition} chain={Chain.BTC} />
     </Hud>
   );
 };
