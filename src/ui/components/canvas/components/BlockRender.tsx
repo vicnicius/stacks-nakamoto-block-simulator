@@ -55,6 +55,7 @@ export const BlockRender: FC<{
   block: Block;
   chain: Blockchain<Chain.STX | Chain.BTC>;
 }> = ({ block, id, chain }) => {
+  const lastClickRef = useRef(Date.now());
   const blockRef = useRef<Mesh>(null);
   const blockMaterialId = useMemo(
     () => `outer-block-${block.type}-${block.state}`,
@@ -85,6 +86,9 @@ export const BlockRender: FC<{
   }, [edgesRef]);
 
   const handleBlockClick = useCallback(() => {
+    if (lastClickRef.current + 250 > Date.now()) {
+      return;
+    }
     if (
       block.type === Chain.STX &&
       block.state !== StacksBlockState.NEW &&
@@ -100,6 +104,7 @@ export const BlockRender: FC<{
     if (Object.keys(state.present[chain.name].blocks).length > 1) {
       automaticScrollToBlock(state.present[chain.name].blocks[id], chain.name);
     }
+    lastClickRef.current = Date.now();
   }, [dispatch, hasChildren, block.type, block.state]);
 
   const handleBlockDoubleClick = useCallback(() => {
