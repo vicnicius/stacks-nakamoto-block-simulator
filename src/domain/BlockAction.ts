@@ -4,8 +4,7 @@ export enum BlockActionType {
   // When mine targets a block, this means mine a new block having that one as parent.
   MINE = "mine",
   FORK = "fork",
-  FREEZE = "freeze",
-  BLESS = "bless",
+  THAW = "thaw",
   HOVER = "hover",
 }
 

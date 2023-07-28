@@ -85,6 +85,12 @@ export const BlockRender: FC<{
   }, [edgesRef]);
 
   const handleBlockClick = useCallback(() => {
+    if (
+      block.type === Chain.STX &&
+      block.state !== StacksBlockState.NEW &&
+      block.state !== StacksBlockState.THAWED
+    )
+      return;
     dispatch({
       type: hasChildren ? BlockActionType.FORK : BlockActionType.MINE,
       targetBlockId: id,
@@ -94,7 +100,18 @@ export const BlockRender: FC<{
     if (Object.keys(state.present[chain.name].blocks).length > 1) {
       automaticScrollToBlock(state.present[chain.name].blocks[id], chain.name);
     }
-  }, [dispatch, hasChildren]);
+  }, [dispatch, hasChildren, block.type, block.state]);
+
+  const handleBlockDoubleClick = useCallback(() => {
+    if (block.type === Chain.STX && block.state === StacksBlockState.FROZEN) {
+      dispatch({
+        type: BlockActionType.THAW,
+        targetBlockId: id,
+        chain: chain.name,
+      });
+      setIsHovering(false);
+    }
+  }, [dispatch, hasChildren, block.type, block.state]);
 
   useEffect(() => {
     document.body.style.cursor = getCursor(isHovering, block);
@@ -140,6 +157,7 @@ export const BlockRender: FC<{
     <AnimatedGroup
       position={[anchorX, anchorY, anchorZ]}
       onClick={handleBlockClick}
+      onDoubleClick={handleBlockDoubleClick}
     >
       <AnimatedBox
         args={[cubeSize, cubeSize, cubeSize]}

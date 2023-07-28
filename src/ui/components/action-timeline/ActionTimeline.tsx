@@ -20,6 +20,9 @@ const InlineIcon = ({
   if (type === BlockActionType.FORK) {
     return <Icon name="fork" className="ActionTimelineIcon" />;
   }
+  if (type === BlockActionType.THAW) {
+    return <Icon name="droplet" className="ActionTimelineIcon" />;
+  }
   return null;
 };
 

@@ -50,6 +50,10 @@ export function getBlockColor(block: Block): string {
     return colors.lightBlue;
   }
 
+  if (block.type === Chain.STX && block.state === StacksBlockState.THAWED) {
+    return colors.darkRed;
+  }
+
   if (block.type === Chain.STX && block.state === StacksBlockState.FINALIZED) {
     return colors.silver;
   }

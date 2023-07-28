@@ -114,6 +114,7 @@ function mineBlock(
       targetBlockId,
       state[targetChain].blocks
     );
+    const parentBlock = state.stacks.blocks[targetBlockId];
     const newStacksBlockAttributes: StacksBlock = {
       type: targetChain,
       bitcoinBlockId: String(newBlockId),
@@ -122,7 +123,7 @@ function mineBlock(
       parentId: targetBlockId,
       confirmations: confirmations,
       position: newPosition,
-      state: StacksBlockState.NEW,
+      state: parentBlock.state,
     };
     const updatedStacksParentBlock: StacksBlock = {
       ...state[targetChain].blocks[targetBlockId],
@@ -282,18 +283,32 @@ function freezeChildren(chain: Blockchain<Chain.STX>, id: string) {
 function applyRules(
   stacksChain: Blockchain<Chain.STX>,
   bitcoinChain: Blockchain<Chain.BTC>,
-  startId: string,
+  longestChainId: string,
   resetHighlight = false
 ): Blockchain<Chain.STX> {
   let previousId: undefined | string = undefined;
-  let currentId = startId;
-  let currentBlock = stacksChain.blocks[startId];
-  const confirmedBitcoinBlock =
-    bitcoinChain.blocks[currentBlock.bitcoinBlockId];
+  let currentId = longestChainId;
+  let currentBlock = stacksChain.blocks[longestChainId];
+  let highestFrozenBlockId;
+  const rootBitcoinBlock = bitcoinChain.blocks[currentBlock.bitcoinBlockId];
+  // The thawed chain has become the longest chain, so we should make it the canonical chain. The thawing is reverted and the conventional rules apply.
+  if (currentBlock.state === StacksBlockState.THAWED) {
+    let lastThawedBlockId: string | undefined = longestChainId;
+    while (
+      lastThawedBlockId &&
+      stacksChain.blocks[lastThawedBlockId].state === StacksBlockState.THAWED
+    ) {
+      stacksChain.blocks[lastThawedBlockId].state = StacksBlockState.NEW;
+      lastThawedBlockId = stacksChain.blocks[lastThawedBlockId].parentId;
+      // eslint-disable-next-line no-console
+      console.log("Reverting thawed block");
+    }
+  }
+
   while (currentBlock.parentId !== undefined) {
     if (
-      currentBlock.confirmations > FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
-      confirmedBitcoinBlock.confirmations <=
+      currentBlock.confirmations >= FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
+      rootBitcoinBlock.confirmations <=
         FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS &&
       currentBlock.state !== StacksBlockState.THAWED
     ) {
@@ -303,9 +318,20 @@ function applyRules(
           freezeChildren(stacksChain, childId);
         }
       });
+      if (!highestFrozenBlockId) {
+        highestFrozenBlockId = currentId;
+      }
     } else if (
-      confirmedBitcoinBlock.confirmations >
-      FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
+      stacksChain.blocks[currentId].state === StacksBlockState.FROZEN &&
+      currentId !== highestFrozenBlockId
+    ) {
+      stacksChain.blocks[currentId].childrenIds.forEach((childId) => {
+        if (previousId !== undefined && childId !== previousId) {
+          freezeChildren(stacksChain, childId);
+        }
+      });
+    } else if (
+      rootBitcoinBlock.confirmations > FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
     ) {
       stacksChain.blocks[currentId].state = StacksBlockState.FINALIZED;
     } else if (currentBlock.state !== StacksBlockState.THAWED) {
@@ -320,15 +346,19 @@ function applyRules(
   }
   if (
     currentBlock.parentId === undefined &&
-    currentBlock.confirmations > FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
-    confirmedBitcoinBlock.confirmations <=
-      FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
+    currentBlock.confirmations >= FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
+    rootBitcoinBlock.confirmations <= FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS &&
+    currentBlock.state !== StacksBlockState.THAWED
   ) {
     stacksChain.blocks[currentId].state = StacksBlockState.FROZEN;
+    stacksChain.blocks[currentId].childrenIds.forEach((childId) => {
+      if (previousId !== undefined && childId !== previousId) {
+        freezeChildren(stacksChain, childId);
+      }
+    });
   } else if (
     currentBlock.parentId === undefined &&
-    confirmedBitcoinBlock.confirmations >
-      FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
+    rootBitcoinBlock.confirmations > FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
   ) {
     stacksChain.blocks[currentId].state = StacksBlockState.FINALIZED;
   } else if (
@@ -380,6 +410,44 @@ function reducer(state: UiState, action: BlockAction): UiState {
         },
       ],
       lastId: nextId,
+    };
+  }
+
+  if (type === BlockActionType.THAW) {
+    const blockId = targetBlockId;
+    if (blockId === undefined) {
+      throw new Error("Trying to thaw unknown block");
+    }
+    if (
+      chain === Chain.STX &&
+      (blockId === undefined ||
+        state.stacks.blocks[blockId].state !== StacksBlockState.FROZEN)
+    ) {
+      throw new Error("Trying to thaw unthawable block");
+    }
+
+    const updatedStacksBlocks: Blockchain<Chain.STX>["blocks"] = {
+      ...state.stacks.blocks,
+      [blockId]: {
+        ...state.stacks.blocks[blockId],
+        state: StacksBlockState.THAWED,
+      },
+    };
+
+    return {
+      bitcoin: state.bitcoin,
+      stacks: {
+        ...state.stacks,
+        blocks: updatedStacksBlocks,
+      },
+      actions: [
+        ...state.actions,
+        {
+          ...action,
+          targetBlockId: blockId,
+        },
+      ],
+      lastId: state.lastId,
     };
   }
 

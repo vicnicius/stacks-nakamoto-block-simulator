@@ -1,4 +1,5 @@
 import React, { FC } from "react";
+import { ReactComponent as Droplet } from "./resources/droplet.svg";
 import { ReactComponent as Export } from "./resources/export.svg";
 import { ReactComponent as Fork } from "./resources/fork.svg";
 import { ReactComponent as Fullscreen } from "./resources/fullscreen.svg";
@@ -14,6 +15,7 @@ import { ReactComponent as ZoomIn } from "./resources/zoom-in.svg";
 import { ReactComponent as ZoomOut } from "./resources/zoom-out.svg";
 
 export type Icons =
+  | "droplet"
   | "fork"
   | "fullscreen"
   | "github"
@@ -34,6 +36,9 @@ interface IconProps {
 }
 
 export const Icon: FC<IconProps> = ({ className, name }) => {
+  if (name === "droplet") {
+    return <Droplet className={className} />;
+  }
   if (name === "export") {
     return <Export className={className} />;
   }
