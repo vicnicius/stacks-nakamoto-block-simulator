@@ -110,14 +110,15 @@ export const BlockRender: FC<{
   }, [dispatch, hasChildren, block.type, block.state]);
 
   const handleBlockDoubleClick = useCallback(() => {
-    if (block.type === Chain.STX && block.state === StacksBlockState.FROZEN) {
-      dispatch({
-        type: BlockActionType.THAW,
-        targetBlockId: id,
-        chain: chain.name,
-      });
-      setIsHovering(false);
-    }
+    throw new Error("test");
+    // if (block.type === Chain.STX && block.state === StacksBlockState.FROZEN) {
+    //   dispatch({
+    //     type: BlockActionType.THAW,
+    //     targetBlockId: id,
+    //     chain: chain.name,
+    //   });
+    //   setIsHovering(false);
+    // }
   }, [dispatch, hasChildren, block.type, block.state]);
 
   useEffect(() => {

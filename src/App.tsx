@@ -1,5 +1,6 @@
 import React, { FC, useCallback, useEffect, useReducer, useState } from "react";
 import "./App.css";
+import { ErrorWrapper } from "./ErrorWrapper";
 import { UiStateContext, timeAwareReducer } from "./UiState";
 import { DebugContext } from "./domain/Debug";
 import {
@@ -104,9 +105,11 @@ export const App: FC = () => {
       >
         <DebugContext.Provider value={{ debug: debugMode }}>
           <UiStateContext.Provider value={{ state, dispatch }}>
-            <Header />
-            <Canvas />
-            <Footer />
+            <ErrorWrapper>
+              <Header />
+              <Canvas />
+              <Footer />
+            </ErrorWrapper>
           </UiStateContext.Provider>
         </DebugContext.Provider>
       </SceneContext.Provider>

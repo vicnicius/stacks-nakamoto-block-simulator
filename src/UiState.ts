@@ -13,6 +13,7 @@ import {
 } from "./domain/BlockAction";
 import { Blockchain } from "./domain/Blockchain";
 import { ImportAction, isImportAction } from "./domain/ImportAction";
+import { ResetAction, isResetAction } from "./domain/ResetAction";
 import { TimeAction, TimeActionType, isTimeAction } from "./domain/TimeAction";
 
 const FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS = 100;
@@ -502,13 +503,29 @@ function reducer(state: UiState, action: BlockAction): UiState {
 
 export function timeAwareReducer(
   state: TimeAwareUiState,
-  action: BlockAction | TimeAction | ImportAction<TimeAwareUiState>
+  action:
+    | BlockAction
+    | TimeAction
+    | ImportAction<TimeAwareUiState>
+    | ResetAction
 ): TimeAwareUiState {
   const { past, present, future } = state;
   if (isImportAction<TimeAwareUiState>(action)) {
     return action.importedState;
   }
-  if (!isTimeAction(action)) {
+  if (isResetAction(action)) {
+    return {
+      past: [],
+      present: {
+        bitcoin: initialBitcoinChain,
+        stacks: initialStacksChain,
+        actions: [],
+        lastId: 1,
+      },
+      future: [],
+    };
+  }
+  if (!isTimeAction(action) && !isResetAction(action)) {
     const newPresent = reducer(present, action);
     // We don't want to store hover actions
     const newPast = isHoverAction(action) ? past : [...past, present];
@@ -625,7 +642,9 @@ export const initialBitcoinChain: Blockchain<Chain.BTC> = {
 
 export const UiStateContext = createContext<{
   state: TimeAwareUiState;
-  dispatch: Dispatch<BlockAction | TimeAction | ImportAction<TimeAwareUiState>>;
+  dispatch: Dispatch<
+    BlockAction | TimeAction | ResetAction | ImportAction<TimeAwareUiState>
+  >;
 }>({
   state: {
     past: [],
