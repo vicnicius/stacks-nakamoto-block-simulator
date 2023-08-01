@@ -50,7 +50,11 @@ export function getBlockColor(block: Block): string {
     return colors.lightBlue;
   }
 
-  if (block.type === Chain.STX && block.state === StacksBlockState.THAWED) {
+  if (
+    block.type === Chain.STX &&
+    (block.state === StacksBlockState.THAWED ||
+      block.state === StacksBlockState.THAWED_CHILDREN)
+  ) {
     return colors.darkRed;
   }
 

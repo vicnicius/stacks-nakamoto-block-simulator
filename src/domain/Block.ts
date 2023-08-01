@@ -22,6 +22,7 @@ interface CommonBlock<T extends Chain> {
 
 export enum StacksBlockState {
   THAWED = "Thawed",
+  THAWED_CHILDREN = "ThawedChildren",
   NEW = "New",
   FROZEN = "Frozen",
   FINALIZED = "Finalized",

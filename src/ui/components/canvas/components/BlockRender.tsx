@@ -40,6 +40,7 @@ function getCursor(isHovering: boolean, block: Block): string {
     isHovering &&
     (block.state === StacksBlockState.NEW ||
       block.state === StacksBlockState.THAWED ||
+      block.state === StacksBlockState.THAWED_CHILDREN ||
       block.state === "Final")
   ) {
     return "pointer";
@@ -92,7 +93,8 @@ export const BlockRender: FC<{
     if (
       block.type === Chain.STX &&
       block.state !== StacksBlockState.NEW &&
-      block.state !== StacksBlockState.THAWED
+      block.state !== StacksBlockState.THAWED &&
+      block.state !== StacksBlockState.THAWED_CHILDREN
     )
       return;
     dispatch({

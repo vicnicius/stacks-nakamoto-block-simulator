@@ -90,7 +90,7 @@ function mineBlock(
   if (targetChain === Chain.STX) {
     // When mining stacks we always do it on a new block of the canonical fork
     const bitcoinParentId = state.bitcoin.longestChainStartId;
-    let confirmations = 1;
+    const confirmations = 1;
     const newBitcoinBlockAttributes: BitcoinBlock = {
       type: Chain.BTC,
       childrenIds: [],
@@ -121,9 +121,12 @@ function mineBlock(
       childrenIds: [],
       isHighlighted: false,
       parentId: targetBlockId,
-      confirmations: confirmations,
+      confirmations,
       position: newPosition,
-      state: parentBlock.state,
+      state:
+        parentBlock.state === StacksBlockState.THAWED
+          ? StacksBlockState.THAWED_CHILDREN
+          : parentBlock.state,
     };
     const updatedStacksParentBlock: StacksBlock = {
       ...state[targetChain].blocks[targetBlockId],
@@ -132,27 +135,6 @@ function mineBlock(
         String(newBlockId),
       ],
     };
-
-    let parentId = newStacksBlockAttributes.parentId;
-    while (parentId !== undefined) {
-      confirmations = confirmations + 1;
-      state[targetChain].blocks[parentId] = {
-        ...state[targetChain].blocks[parentId],
-        confirmations: confirmations,
-      };
-      parentId = state[targetChain].blocks[parentId].parentId;
-    }
-
-    let tmpBitcoinParentId = newBitcoinBlockAttributes.parentId;
-    let bitcoinConfirmations = 1;
-    while (tmpBitcoinParentId !== undefined) {
-      bitcoinConfirmations = bitcoinConfirmations + 1;
-      state.bitcoin.blocks[tmpBitcoinParentId] = {
-        ...state.bitcoin.blocks[tmpBitcoinParentId],
-        confirmations: bitcoinConfirmations,
-      };
-      tmpBitcoinParentId = state.bitcoin.blocks[tmpBitcoinParentId].parentId;
-    }
 
     return {
       bitcoin: {
@@ -176,11 +158,10 @@ function mineBlock(
 
   if (targetChain === Chain.BTC) {
     // When mining stacks we always do it on a new block of the canonical fork
-    let confirmations = 1;
     const newBitcoinBlockAttributes: BitcoinBlock = {
       type: Chain.BTC,
       childrenIds: [],
-      confirmations,
+      confirmations: 1,
       isHighlighted: false,
       parentId: targetBlockId,
       position: getNewPosition(String(targetBlockId), state[Chain.BTC].blocks),
@@ -193,16 +174,6 @@ function mineBlock(
         String(newBlockId),
       ],
     };
-
-    let parentId = newBitcoinBlockAttributes.parentId;
-    while (parentId !== undefined) {
-      confirmations = confirmations + 1;
-      state[targetChain].blocks[parentId] = {
-        ...state[targetChain].blocks[parentId],
-        confirmations: confirmations,
-      };
-      parentId = state[targetChain].blocks[parentId].parentId;
-    }
 
     return {
       bitcoin: {
@@ -273,102 +244,123 @@ function getLongestChainStartId<T extends Chain>(chain: Blockchain<T>): string {
   return String(longestBlockId);
 }
 
-function freezeChildren(chain: Blockchain<Chain.STX>, id: string) {
+function freezeChildren(
+  chain: Blockchain<Chain.STX>,
+  id: string,
+  excludeId?: string
+) {
   chain.blocks[id].state = StacksBlockState.FROZEN;
   chain.blocks[id].childrenIds.forEach((childId) => {
-    freezeChildren(chain, childId);
+    if (childId !== excludeId) {
+      freezeChildren(chain, childId, excludeId);
+    }
   });
+}
+
+function revokeOtherThawedBlocks(
+  chain: Blockchain<Chain.STX>,
+  validThawedBlockIds: string[]
+) {
+  Object.keys(chain.blocks).forEach((blockId) => {
+    if (
+      !validThawedBlockIds.includes(blockId) &&
+      chain.blocks[blockId].state === StacksBlockState.THAWED
+    ) {
+      // reset thawed blocks to new
+      chain.blocks[blockId].state = StacksBlockState.NEW;
+      chain.blocks[blockId].childrenIds.forEach((childId) => {
+        chain.blocks[childId].state = StacksBlockState.NEW;
+      });
+    }
+  });
+}
+
+function updateConfirmations<T extends Chain>(
+  chain: Blockchain<T>,
+  tipId: string,
+  forkStartId?: string
+): Blockchain<T> {
+  // Update confirmations from the fork tip first
+  // Then updates the canonical chain
+  if (forkStartId !== undefined && forkStartId !== tipId) {
+    updateConfirmations(chain, forkStartId);
+  }
+  let blockId: string | undefined = tipId;
+  let confirmations = 1;
+  while (blockId !== undefined) {
+    chain.blocks[blockId].confirmations = confirmations;
+    blockId = chain.blocks[blockId].parentId;
+    confirmations = confirmations + 1;
+  }
+
+  return chain;
 }
 
 function applyRules(
   stacksChain: Blockchain<Chain.STX>,
   bitcoinChain: Blockchain<Chain.BTC>,
-  longestChainId: string,
+  longestChainStartId: string,
+  targetBlockId?: string,
   resetHighlight = false
 ): Blockchain<Chain.STX> {
-  let previousId: undefined | string = undefined;
-  let currentId = longestChainId;
-  let currentBlock = stacksChain.blocks[longestChainId];
-  let highestFrozenBlockId;
-  const rootBitcoinBlock = bitcoinChain.blocks[currentBlock.bitcoinBlockId];
-  // The thawed chain has become the longest chain, so we should make it the canonical chain. The thawing is reverted and the conventional rules apply.
-  if (currentBlock.state === StacksBlockState.THAWED) {
-    let lastThawedBlockId: string | undefined = longestChainId;
-    while (
-      lastThawedBlockId &&
-      stacksChain.blocks[lastThawedBlockId].state === StacksBlockState.THAWED
-    ) {
-      stacksChain.blocks[lastThawedBlockId].state = StacksBlockState.NEW;
-      lastThawedBlockId = stacksChain.blocks[lastThawedBlockId].parentId;
-      // eslint-disable-next-line no-console
-      console.log("Reverting thawed block");
-    }
+  // Initialize pointers
+  const currentTargetBlock = targetBlockId
+    ? stacksChain.blocks[targetBlockId]
+    : undefined;
+  let previousBlockId: string | undefined = undefined;
+  let currentBlockId: string | undefined = longestChainStartId;
+  let currentBlock = stacksChain.blocks[currentBlockId];
+  let currentBitcoinBlock = bitcoinChain.blocks[currentBlock.bitcoinBlockId];
+
+  // If the target block is thawed, we need to revoke the other currently active thawed blocks
+  if (
+    currentTargetBlock?.state === StacksBlockState.THAWED &&
+    targetBlockId !== undefined
+  ) {
+    revokeOtherThawedBlocks(stacksChain, [targetBlockId]);
   }
 
-  while (currentBlock.parentId !== undefined) {
-    if (
-      currentBlock.confirmations >= FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
-      rootBitcoinBlock.confirmations <=
-        FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS &&
-      currentBlock.state !== StacksBlockState.THAWED
-    ) {
-      stacksChain.blocks[currentId].state = StacksBlockState.FROZEN;
-      stacksChain.blocks[currentId].childrenIds.forEach((childId) => {
-        if (previousId !== undefined && childId !== previousId) {
-          freezeChildren(stacksChain, childId);
-        }
-      });
-      if (!highestFrozenBlockId) {
-        highestFrozenBlockId = currentId;
-      }
-    } else if (
-      stacksChain.blocks[currentId].state === StacksBlockState.FROZEN &&
-      currentId !== highestFrozenBlockId
-    ) {
-      stacksChain.blocks[currentId].childrenIds.forEach((childId) => {
-        if (previousId !== undefined && childId !== previousId) {
-          freezeChildren(stacksChain, childId);
-        }
-      });
-    } else if (
-      rootBitcoinBlock.confirmations > FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
-    ) {
-      stacksChain.blocks[currentId].state = StacksBlockState.FINALIZED;
-    } else if (currentBlock.state !== StacksBlockState.THAWED) {
-      stacksChain.blocks[currentId].state = StacksBlockState.NEW;
-    }
-    previousId = currentId;
-    currentId = currentBlock.parentId;
-    currentBlock = stacksChain.blocks[currentBlock.parentId];
+  // If the current thawed chain becomes the canonical chain, we need to revoke all thawed blocks
+  if (
+    currentTargetBlock?.state === StacksBlockState.THAWED_CHILDREN &&
+    currentTargetBlock.childrenIds.includes(longestChainStartId)
+  ) {
+    revokeOtherThawedBlocks(stacksChain, []);
+  }
+
+  while (currentBlockId !== undefined) {
     if (resetHighlight) {
       currentBlock.isHighlighted = false;
     }
-  }
-  if (
-    currentBlock.parentId === undefined &&
-    currentBlock.confirmations >= FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
-    rootBitcoinBlock.confirmations <= FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS &&
-    currentBlock.state !== StacksBlockState.THAWED
-  ) {
-    stacksChain.blocks[currentId].state = StacksBlockState.FROZEN;
-    stacksChain.blocks[currentId].childrenIds.forEach((childId) => {
-      if (previousId !== undefined && childId !== previousId) {
-        freezeChildren(stacksChain, childId);
-      }
-    });
-  } else if (
-    currentBlock.parentId === undefined &&
-    rootBitcoinBlock.confirmations > FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
-  ) {
-    stacksChain.blocks[currentId].state = StacksBlockState.FINALIZED;
-  } else if (
-    currentBlock.parentId === undefined &&
-    currentBlock.state !== StacksBlockState.THAWED
-  ) {
-    stacksChain.blocks[currentId].state = StacksBlockState.NEW;
-  }
-  if (resetHighlight) {
-    stacksChain.blocks[currentId].isHighlighted = false;
+    if (
+      // Freeze block rules
+      currentBlock.confirmations >= FROZEN_BLOCKS_REQUIRED_CONFIRMATIONS &&
+      currentBlock.state !== StacksBlockState.THAWED &&
+      currentBitcoinBlock.confirmations <
+        FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
+    ) {
+      currentBlock.state = StacksBlockState.FROZEN;
+      freezeChildren(stacksChain, currentBlockId, previousBlockId);
+    } else if (
+      // Finalize blocks rules
+      currentBitcoinBlock.confirmations >=
+      FINALIZED_BLOCKS_REQUIRED_CONFIRMATIONS
+    ) {
+      currentBlock.state = StacksBlockState.FINALIZED;
+    } else if (
+      // Reset block to "NEW" if none of the other rules apply
+      currentBlock.state !== StacksBlockState.THAWED
+    ) {
+      currentBlock.state = StacksBlockState.NEW;
+    }
+
+    // Update pointers
+    previousBlockId = currentBlockId;
+    currentBlockId = currentBlock.parentId;
+    if (currentBlockId) {
+      currentBlock = stacksChain.blocks[currentBlockId];
+      currentBitcoinBlock = bitcoinChain.blocks[currentBlock.bitcoinBlockId];
+    }
   }
 
   return { ...stacksChain };
@@ -383,21 +375,34 @@ function reducer(state: UiState, action: BlockAction): UiState {
     if (
       chain === Chain.STX &&
       state.stacks.blocks[blockId].state !== StacksBlockState.NEW &&
-      state.stacks.blocks[blockId].state !== StacksBlockState.THAWED
+      state.stacks.blocks[blockId].state !== StacksBlockState.THAWED &&
+      state.stacks.blocks[blockId].state !== StacksBlockState.THAWED_CHILDREN
     ) {
       throw new Error("Trying to mine unmineable block");
     }
 
     const nextId = state.lastId + 1;
-    const { bitcoin, stacks: updatedStacksChain } = mineBlock(
-      blockId,
-      nextId,
-      chain,
-      state
-    );
+    const { bitcoin: updatedBitcoinChain, stacks: updatedStacksChain } =
+      mineBlock(blockId, nextId, chain, state);
     const longestStacksTipId = getLongestChainStartId(updatedStacksChain);
-    const longestBitcoinTipId = getLongestChainStartId(bitcoin);
-    const stacks = applyRules(updatedStacksChain, bitcoin, longestStacksTipId);
+    const longestBitcoinTipId = getLongestChainStartId(updatedBitcoinChain);
+    const updatedStacksChainWithConfirmations = updateConfirmations(
+      updatedStacksChain,
+      longestStacksTipId,
+      nextId.toString()
+    );
+    const bitcoin = updateConfirmations(
+      updatedBitcoinChain,
+      longestBitcoinTipId,
+      nextId.toString()
+    );
+    const stacks = applyRules(
+      updatedStacksChainWithConfirmations,
+      bitcoin,
+      longestStacksTipId,
+      targetBlockId,
+      false
+    );
 
     return {
       stacks: { ...stacks, longestChainStartId: longestStacksTipId },
@@ -434,12 +439,17 @@ function reducer(state: UiState, action: BlockAction): UiState {
       },
     };
 
+    const stacks = applyRules(
+      { ...state.stacks, blocks: updatedStacksBlocks },
+      state.bitcoin,
+      state.stacks.longestChainStartId,
+      targetBlockId,
+      false
+    );
+
     return {
       bitcoin: state.bitcoin,
-      stacks: {
-        ...state.stacks,
-        blocks: updatedStacksBlocks,
-      },
+      stacks,
       actions: [
         ...state.actions,
         {
@@ -528,10 +538,12 @@ export function timeAwareReducer(
     action.type === TimeActionType.PREVIEW &&
     action.targetActionIndex === undefined
   ) {
+    // Re-apply rules to the new present state
     const stacks = applyRules(
       present.stacks,
       present.bitcoin,
       present.stacks.longestChainStartId,
+      undefined,
       true
     );
     return {
@@ -548,10 +560,12 @@ export function timeAwareReducer(
     action.targetActionIndex !== undefined
   ) {
     const preview = past[action.targetActionIndex + 1] ?? present;
+    // Re-apply rules to the new present state
     const stacks = applyRules(
       preview.stacks,
       preview.bitcoin,
       preview.stacks.longestChainStartId,
+      undefined,
       true
     );
     return {
