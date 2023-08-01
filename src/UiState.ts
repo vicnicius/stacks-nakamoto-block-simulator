@@ -56,7 +56,7 @@ function getNewPosition(
   const verticalPosition = blocks[targetBlockId].position.vertical + 1;
   const horizontalPosition = blocks[targetBlockId].position.horizontal;
   let availableHorizontalPosition;
-  for (let i = 0; i <= 5; i = i + 1) {
+  for (let i = 0; i <= 3; i = i + 1) {
     const tryHorizontalPosition = horizontalPosition + i;
     const tryHorizontalPositionNegative = horizontalPosition - i;
     if (
